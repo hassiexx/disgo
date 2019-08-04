@@ -2,7 +2,10 @@ package gateway
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"time"
+
+	"golang.org/x/xerrors"
 
 	"nhooyr.io/websocket"
 )
@@ -13,7 +16,7 @@ const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-st
 type Session struct {
 	cancel            func()
 	ctx               context.Context
-	heartbeatInterval int
+	heartbeatInterval time.Duration
 	shardCount        uint
 	shardID           uint
 	token             string
@@ -36,7 +39,7 @@ func (s *Session) Open(ctx context.Context) error {
 	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{})
 	if err != nil {
 		s.cancel()
-		return err
+		return xerrors.Errorf("failed to handshake: %v", err)
 	}
 
 	// Store websocket.
@@ -45,36 +48,63 @@ func (s *Session) Open(ctx context.Context) error {
 	// Set message limit to 1GB.
 	s.ws.SetReadLimit(1073741824)
 
-	// Handle hello payload.
-	err = s.handleHello()
+	// Read hello payload.
+	err = s.readHello()
 	if err != nil {
-		return err
+		return xerrors.Errorf("failed to read hello payload: %v", err)
 	}
 
 	return nil
 }
 
-func (s *Session) handleHello() error {
-	// Read hello payload.
+func (s *Session) readHello() error {
+	// Read payload.
+	payload, err := s.readPayload()
+	if err != nil {
+		return xerrors.Errorf("failed to get hello payload: %v", err)
+	}
+
+	// We should get an opcode 10.
+	if payload.Op != 10 {
+		return xerrors.Errorf("failed to get hello payload: %v", err)
+	}
+
+	// Unmarshal payload data.
+	var helloPayload helloPayload
+	if err = unmarshal(payload.D, &helloPayload); err != nil {
+		return xerrors.Errorf("failed to unmarshal hello payload: %v", err)
+	}
+
+	// Store heatbeat interval.
+	s.heartbeatInterval = time.Duration(helloPayload.HeartbeatInterval) * time.Millisecond
+
+	return nil
+}
+
+func (s *Session) readPayload() (*payload, error) {
+	// Read payload.
 	msgType, msg, err := s.ws.Read(s.ctx)
 	if err != nil {
-		return err
+		return nil, xerrors.Errorf("failed to read payload: %v", err)
 	}
-	log.Println(msg)
 
-	// Parse payload.
+	// Get payload data.
 	var data []byte
-
-	// We should get a compressed zlib stream.
 	if msgType == websocket.MessageBinary {
-		// Decompress.
+		// Decompress payload.
 		data, err = decompress(msg)
 		if err != nil {
-			return err
+			return nil, xerrors.Errorf("failed to decompress payload: %v", err)
 		}
 	} else {
 		data = msg
 	}
 
-	return err
+	// Unmarshal payload into json.
+	var payload payload
+	if err = unmarshal(data, &payload); err != nil {
+		return nil, xerrors.Errorf("failed to unmarshal payload: %v", err)
+	}
+
+	return &payload, nil
 }
