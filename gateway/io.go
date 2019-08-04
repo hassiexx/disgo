@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/json"
+	"io"
 	"io/ioutil"
-	"log"
 )
 
 func compress(data []byte) ([]byte, error) {
@@ -41,8 +41,11 @@ func decompress(data []byte) ([]byte, error) {
 	// Read from zlib reader.
 	decompressed, err := ioutil.ReadAll(reader)
 	if err != nil {
-		log.Println(string(decompressed))
-		return nil, err
+		// Ignore unexpected EOF errors.
+		// Go zlib does not treat the zlib suffix 0 0 255 255 as end of file.
+		if err != io.ErrUnexpectedEOF {
+			return nil, err
+		}
 	}
 
 	return decompressed, nil
