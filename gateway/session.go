@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"golang.org/x/xerrors"
@@ -10,13 +11,13 @@ import (
 	"nhooyr.io/websocket"
 )
 
-const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream"
+const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json"
 
 // Session is a single connection to the Discord Gateway.
 type Session struct {
-	cancel            func()
-	ctx               context.Context
 	heartbeatInterval time.Duration
+	sequence          int64
+	sessionID         string
 	shardCount        uint
 	shardID           uint
 	token             string
@@ -33,12 +34,16 @@ func NewSession(shardCount uint, shardID uint, token string) *Session {
 
 func (s *Session) Open(ctx context.Context) error {
 	// Wrap context to get a cancel func.
-	s.ctx, s.cancel = context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(ctx)
+
+	// Initialise websocket headers.
+	headers := http.Header{}
+	headers.Add("Accept-Encoding", "zlib")
 
 	// Attempt to handshake.
-	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{})
+	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{HTTPHeader: headers})
 	if err != nil {
-		s.cancel()
+		cancel()
 		return xerrors.Errorf("failed to handshake: %v", err)
 	}
 
@@ -49,41 +54,116 @@ func (s *Session) Open(ctx context.Context) error {
 	s.ws.SetReadLimit(1073741824)
 
 	// Read hello payload.
-	err = s.readHello()
+	err = s.readHello(ctx)
 	if err != nil {
+		cancel()
 		return xerrors.Errorf("failed to read hello payload: %v", err)
 	}
+
+	// Start heartbeating.
+	go s.heartbeat(ctx, cancel)
+
+	// If we don't have a sequence number and a session ID, create a new session,
+	// otherwise resume.
 
 	return nil
 }
 
-func (s *Session) readHello() error {
+func (s *Session) heartbeat(ctx context.Context, cancel context.CancelFunc) {
+	// Create ticker.
+	ticker := time.NewTicker(s.heartbeatInterval)
+
+	// Stop ticker before returning.
+	defer ticker.Stop()
+
+	for {
+		// Send heartbeat.
+		err := s.sendHeartbeat(ctx)
+		if err != nil {
+			// TODO: Close session and reopen.
+			cancel()
+		}
+
+		select {
+		case <-ticker.C:
+			// Send heartbeat.
+		case <-ctx.Done():
+			// Stop heartbeating.
+			return
+		}
+	}
+}
+
+func (s *Session) readHello(ctx context.Context) error {
 	// Read payload.
-	payload, err := s.readPayload()
+	payload, err := s.readPayload(ctx)
 	if err != nil {
 		return xerrors.Errorf("failed to get hello payload: %v", err)
 	}
 
 	// We should get an opcode 10.
 	if payload.Op != 10 {
-		return xerrors.Errorf("failed to get hello payload: %v", err)
+		return xerrors.Errorf("failed to get hello payload: got opcode %d instead", payload.Op)
 	}
 
 	// Unmarshal payload data.
-	var helloPayload helloPayload
-	if err = unmarshal(payload.D, &helloPayload); err != nil {
+	var helloData helloData
+	if err = unmarshal(payload.D, &helloData); err != nil {
 		return xerrors.Errorf("failed to unmarshal hello payload: %v", err)
 	}
 
 	// Store heatbeat interval.
-	s.heartbeatInterval = time.Duration(helloPayload.HeartbeatInterval) * time.Millisecond
+	s.heartbeatInterval = time.Duration(helloData.HeartbeatInterval) * time.Millisecond
 
 	return nil
 }
 
-func (s *Session) readPayload() (*payload, error) {
+func (s *Session) sendHeartbeat(ctx context.Context) error {
+	// Create payload.
+	payload := heartbeatPayload{
+		Op: uint(OpcodeHeartbeat),
+		D:  0,
+	}
+
+	// Marshal payload.
+	data, err := marshal(payload)
+	if err != nil {
+		return xerrors.Errorf("failed to marshal heartbeat payload: %v", err)
+	}
+
+	// Send payload.
+	if err = s.ws.Write(ctx, websocket.MessageText, data); err != nil {
+		return xerrors.Errorf("failed to send heartbeat payload: %v", err)
+	}
+
+	return nil
+}
+
+/*
+func (s *Session) sendIdentify() error {
+	// Create payload.
+	payload := identifyPayload{
+		Op: uint(OpcodeIdentify),
+		D: identifyData{
+			Token: s.token,
+			Properties: identifyProperties{
+				OS:      runtime.GOOS,
+				Browser: "Disgo",
+				Device:  "Disgo",
+			},
+			Compress:           true,
+			LargeThreshold:     250,
+			Shard:              []uint{s.shardID, s.shardCount},
+			GuildSubscriptions: true,
+		},
+	}
+
+	return nil
+}*/
+
+func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Read payload.
-	msgType, msg, err := s.ws.Read(s.ctx)
+	msgType, msg, err := s.ws.Read(ctx)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to read payload: %v", err)
 	}
@@ -92,6 +172,7 @@ func (s *Session) readPayload() (*payload, error) {
 	var data []byte
 	if msgType == websocket.MessageBinary {
 		// Decompress payload.
+		fmt.Println(msg)
 		data, err = decompress(msg)
 		if err != nil {
 			return nil, xerrors.Errorf("failed to decompress payload: %v", err)
