@@ -3,7 +3,7 @@ package gateway
 import "encoding/json"
 
 type heartbeatPayload struct {
-	Op uint `json:"op"`
+	Op uint  `json:"op"`
 	D  int64 `json:"d"`
 }
 
