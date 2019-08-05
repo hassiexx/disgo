@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -16,7 +17,8 @@ const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json"
 
 // Session is a single connection to the Discord Gateway.
 type Session struct {
-	disconnect     chan struct{}
+	disconnect     chan bool
+	done           chan struct{}
 	heartbeatState *heartbeatState
 	log            *zap.Logger
 	sequence       int64
@@ -24,6 +26,7 @@ type Session struct {
 	shardCount     uint
 	shardID        uint
 	token          string
+	wg             sync.WaitGroup
 	ws             *websocket.Conn
 }
 
@@ -37,8 +40,9 @@ func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string)
 }
 
 func (s *Session) Open(ctx context.Context) error {
-	// Wrap context to get a cancel func.
-	ctx, cancel := context.WithCancel(ctx)
+	// Create channels.
+	s.disconnect = make(chan bool)
+	s.done = make(chan struct{})
 
 	// Initialise websocket headers.
 	headers := http.Header{}
@@ -48,7 +52,7 @@ func (s *Session) Open(ctx context.Context) error {
 	s.log.Debug("attempting to connect to the gateway", zap.Uint("shard", s.shardID))
 	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{HTTPHeader: headers})
 	if err != nil {
-		cancel()
+		close(s.done)
 		return xerrors.Errorf("failed to handshake: %v", err)
 	}
 
@@ -62,34 +66,78 @@ func (s *Session) Open(ctx context.Context) error {
 	s.log.Debug("receiving hello payload", zap.Uint("shard", s.shardID))
 	err = s.readHello(ctx)
 	if err != nil {
-		cancel()
+		close(s.done)
 		return xerrors.Errorf("failed to read hello payload: %v", err)
 	}
 
 	// Start heartbeating.
-	go s.heartbeat(ctx, cancel)
+	s.wg.Add(1)
+	go s.heartbeat(ctx)
 
 	// If we don't have a sequence number and a session ID, create a new session,
 	// otherwise resume.
 	if s.sequence == 0 && s.sessionID == "" {
 		err = s.identify(ctx)
 		if err != nil {
+			close(s.done)
 			return xerrors.Errorf("failed to identify: %v", err)
 		}
+
+		// Start handling connection.
+		go s.handleConnection(ctx)
 	} else {
 		// TODO: resume
-
 	}
 
 	return nil
 }
 
-func (s *Session) heartbeat(ctx context.Context, cancel context.CancelFunc) {
+func (s *Session) handleConnection(ctx context.Context) {
+	// Var to store whether to reconnect after disconnecting.
+	var reconnect bool
+
+	select {
+	case <-s.done:
+		// Received disconnect signal from external source.
+		// Stop handling connection.
+		return
+	case reconnect = <-s.disconnect:
+	case <-ctx.Done():
+	}
+
+	// Signal goroutines to stop.
+	close(s.done)
+
+	// Wait for goroutines to stop.
+	s.wg.Wait()
+
+	// Close session.
+	err := s.ws.Close(websocket.StatusNormalClosure, "")
+	if err != nil {
+		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID))
+		return
+	}
+
+	if reconnect {
+		// Reopen session.
+		err := s.Open(ctx)
+		if err != nil {
+			s.log.Info("failed to reconnect websocket", zap.Uint("shard", s.shardID))
+		}
+	} else {
+		// Reset session state.
+		s.sequence = 0
+		s.sessionID = ""
+	}
+}
+
+func (s *Session) heartbeat(ctx context.Context) {
 	// Create ticker.
 	ticker := time.NewTicker(s.heartbeatState.Interval)
 
-	// Stop ticker before returning.
+	// Stop ticker and call done on wait group before returning.
 	defer ticker.Stop()
+	defer s.wg.Done()
 
 	for {
 		// Lock heartbeat state.
@@ -98,26 +146,31 @@ func (s *Session) heartbeat(ctx context.Context, cancel context.CancelFunc) {
 		// If we have not received a heartbeat ack since the last heartbeat time,
 		// we need to disconnect and attempt to resume.
 		if s.heartbeatState.LastHeartbeatAck.Before(s.heartbeatState.LastHeartbeatSend) {
+			// Log.
 			s.log.Warn("did not receive a heartbeat ack, reconnecting", zap.Uint("shard", s.shardID))
-			s.heartbeatState.Unlock()
-			// TODO: Close session and reopen.
-			return
+
+			// Signal reconnect.
+			s.disconnect <- true
+		} else {
+			// Send heartbeat.
+			s.log.Debug("sending heartbeat", zap.Uint("shard", s.shardID))
+			s.heartbeatState.LastHeartbeatSend = time.Now().UTC()
+			err := s.sendHeartbeat(ctx)
+			if err != nil {
+				// Signal reconnect.
+				s.disconnect <- true
+			}
 		}
 
-		// Send heartbeat.
-		s.log.Debug("sending heartbeat", zap.Uint("shard", s.shardID))
-		s.heartbeatState.LastHeartbeatSend = time.Now().UTC()
-		err := s.sendHeartbeat(ctx)
-		if err != nil {
-			// TODO: Close session and reopen.
-			s.heartbeatState.Unlock()
-			cancel()
-		}
+		// Unlock heartbeat state.
 		s.heartbeatState.Unlock()
 
 		select {
 		case <-ticker.C:
 			// Send heartbeat.
+		case <-s.done:
+			// Stop heartbeating.
+			return
 		case <-ctx.Done():
 			// Stop heartbeating.
 			return
