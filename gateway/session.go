@@ -97,7 +97,7 @@ func (s *Session) heartbeat(ctx context.Context, cancel context.CancelFunc) {
 
 		// If we have not received a heartbeat ack since the last heartbeat time,
 		// we need to disconnect and attempt to resume.
-		if s.heartbeatState.LastHeartbeatAck.Before(s.heartbeatState.LastHeartbeatTime) {
+		if s.heartbeatState.LastHeartbeatAck.Before(s.heartbeatState.LastHeartbeatSend) {
 			s.log.Warn("did not receive a heartbeat ack, reconnecting", zap.Uint("shard", s.shardID))
 			s.heartbeatState.Unlock()
 			// TODO: Close session and reopen.
@@ -106,7 +106,7 @@ func (s *Session) heartbeat(ctx context.Context, cancel context.CancelFunc) {
 
 		// Send heartbeat.
 		s.log.Debug("sending heartbeat", zap.Uint("shard", s.shardID))
-		s.heartbeatState.LastHeartbeatTime = time.Now().UTC()
+		s.heartbeatState.LastHeartbeatSend = time.Now().UTC()
 		err := s.sendHeartbeat(ctx)
 		if err != nil {
 			// TODO: Close session and reopen.
