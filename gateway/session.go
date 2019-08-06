@@ -53,7 +53,7 @@ func (s *Session) Open(ctx context.Context) error {
 	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{HTTPHeader: headers})
 	if err != nil {
 		close(s.done)
-		return xerrors.Errorf("failed to handshake: %v", err)
+		return xerrors.Errorf("failed to handshake: %w", err)
 	}
 
 	// Store websocket.
@@ -67,7 +67,7 @@ func (s *Session) Open(ctx context.Context) error {
 	err = s.readHello(ctx)
 	if err != nil {
 		close(s.done)
-		return xerrors.Errorf("failed to read hello payload: %v", err)
+		return xerrors.Errorf("failed to read hello payload: %w", err)
 	}
 
 	// Start heartbeating.
@@ -80,7 +80,7 @@ func (s *Session) Open(ctx context.Context) error {
 		err = s.identify(ctx)
 		if err != nil {
 			close(s.done)
-			return xerrors.Errorf("failed to identify: %v", err)
+			return xerrors.Errorf("failed to identify: %w", err)
 		}
 
 		// Start handling connection.
@@ -182,7 +182,7 @@ func (s *Session) readHello(ctx context.Context) error {
 	// Read payload.
 	payload, err := s.readPayload(ctx)
 	if err != nil {
-		return xerrors.Errorf("failed to get hello payload: %v", err)
+		return xerrors.Errorf("failed to get hello payload: %w", err)
 	}
 
 	// We should get an opcode 10.
@@ -193,7 +193,7 @@ func (s *Session) readHello(ctx context.Context) error {
 	// Unmarshal payload data.
 	var helloData helloData
 	if err = unmarshal(payload.D, &helloData); err != nil {
-		return xerrors.Errorf("failed to unmarshal hello payload: %v", err)
+		return xerrors.Errorf("failed to unmarshal hello payload: %w", err)
 	}
 
 	// Store heatbeat interval.
@@ -214,12 +214,12 @@ func (s *Session) sendHeartbeat(ctx context.Context) error {
 	// Marshal payload.
 	data, err := marshal(payload)
 	if err != nil {
-		return xerrors.Errorf("failed to marshal heartbeat payload: %v", err)
+		return xerrors.Errorf("failed to marshal heartbeat payload: %w", err)
 	}
 
 	// Send payload.
 	if err = s.ws.Write(ctx, websocket.MessageText, data); err != nil {
-		return xerrors.Errorf("failed to send heartbeat payload: %v", err)
+		return xerrors.Errorf("failed to send heartbeat payload: %w", err)
 	}
 
 	return nil
@@ -245,7 +245,7 @@ func (s *Session) identify(ctx context.Context) error {
 
 	err := s.sendPayload(ctx, payload)
 	if err != nil {
-		return xerrors.Errorf("failed to send identify payload: %v", err)
+		return xerrors.Errorf("failed to send identify payload: %w", err)
 	}
 
 	return nil
@@ -255,7 +255,7 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Read payload.
 	msgType, msg, err := s.ws.Read(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to read payload: %v", err)
+		return nil, xerrors.Errorf("failed to read payload: %w", err)
 	}
 
 	// Get payload data.
@@ -265,7 +265,7 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 		fmt.Println(msg)
 		data, err = decompress(msg)
 		if err != nil {
-			return nil, xerrors.Errorf("failed to decompress payload: %v", err)
+			return nil, xerrors.Errorf("failed to decompress payload: %w", err)
 		}
 	} else {
 		data = msg
@@ -274,7 +274,7 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Unmarshal payload into json.
 	var payload payload
 	if err = unmarshal(data, &payload); err != nil {
-		return nil, xerrors.Errorf("failed to unmarshal payload: %v", err)
+		return nil, xerrors.Errorf("failed to unmarshal payload: %w", err)
 	}
 
 	return &payload, nil
@@ -284,13 +284,13 @@ func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	// Unmarshal payload.
 	data, err := marshal(payload)
 	if err != nil {
-		return xerrors.Errorf("failed to marshal payload: %v", err)
+		return xerrors.Errorf("failed to marshal payload: %w", err)
 	}
 
 	// Send payload.
 	err = s.ws.Write(ctx, websocket.MessageText, data)
 	if err != nil {
-		return xerrors.Errorf("failed to send payload: %v0", err)
+		return xerrors.Errorf("failed to send payload: %w", err)
 	}
 
 	return nil
