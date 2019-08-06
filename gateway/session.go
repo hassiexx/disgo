@@ -21,7 +21,6 @@ type Session struct {
 	done           chan struct{}
 	heartbeatState *heartbeatState
 	log            *zap.Logger
-	rateLimiter    *rateLimiter
 	sequence       int64
 	sessionID      string
 	shardCount     uint
@@ -287,11 +286,6 @@ func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	if err != nil {
 		return xerrors.Errorf("failed to marshal payload: %w", err)
 	}
-
-	// Acquire token from rate limiter.
-	s.rateLimiter.Lock()
-	s.rateLimiter.consume()
-	s.rateLimiter.Unlock()
 
 	// Send payload.
 	err = s.ws.Write(ctx, websocket.MessageText, data)
