@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"go.uber.org/zap"
@@ -13,6 +14,7 @@ import (
 	"nhooyr.io/websocket"
 )
 
+// Gateway URL
 const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json"
 
 // Session is a single connection to the Discord Gateway.
@@ -21,7 +23,7 @@ type Session struct {
 	done           chan struct{}
 	heartbeatState *heartbeatState
 	log            *zap.Logger
-	sequence       int64
+	sequence       uint64
 	sessionID      string
 	shardCount     uint
 	shardID        uint
@@ -30,6 +32,7 @@ type Session struct {
 	ws             *websocket.Conn
 }
 
+// NewSession creates a new session.
 func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string) *Session {
 	return &Session{
 		log:        logger,
@@ -39,6 +42,7 @@ func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string)
 	}
 }
 
+// Open opens the session.
 func (s *Session) Open(ctx context.Context) error {
 	// Create channels.
 	s.disconnect = make(chan bool)
@@ -49,11 +53,11 @@ func (s *Session) Open(ctx context.Context) error {
 	headers.Add("Accept-Encoding", "zlib")
 
 	// Attempt to handshake.
-	s.log.Debug("attempting to connect to the gateway", zap.Uint("shard", s.shardID))
+	s.log.Debug("connecting to the gateway", zap.Uint("shard", s.shardID))
 	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{HTTPHeader: headers})
 	if err != nil {
 		close(s.done)
-		return xerrors.Errorf("failed to handshake: %w", err)
+		return xerrors.Errorf("failed to connect to the gateway: %w", err)
 	}
 
 	// Store websocket.
@@ -64,7 +68,7 @@ func (s *Session) Open(ctx context.Context) error {
 
 	// Read hello payload.
 	s.log.Debug("receiving hello payload", zap.Uint("shard", s.shardID))
-	err = s.readHello(ctx)
+	err = s.hello(ctx)
 	if err != nil {
 		close(s.done)
 		return xerrors.Errorf("failed to read hello payload: %w", err)
@@ -74,24 +78,34 @@ func (s *Session) Open(ctx context.Context) error {
 	s.wg.Add(1)
 	go s.heartbeat(ctx)
 
-	// If we don't have a sequence number and a session ID, create a new session,
-	// otherwise resume.
-	if s.sequence == 0 && s.sessionID == "" {
-		err = s.identify(ctx)
-		if err != nil {
-			close(s.done)
+	// If we have a sequence number or a session ID, attempt to resume,
+	// otherwise create a new session.
+	newSession := true
+	if s.sequence != 0 || s.sessionID != "" {
+		// Resume.
+		s.log.Debug("resuming session")
+		if err = s.resume(ctx); err != nil {
+			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID), zap.Error(err))
+		} else {
+			newSession = false
+		}
+	}
+
+	// Check if a new session should be created.
+	if newSession {
+		// Identify.
+		if err = s.identify(ctx); err != nil {
 			return xerrors.Errorf("failed to identify: %w", err)
 		}
-
-		// Start handling connection.
-		go s.handleConnection(ctx)
-	} else {
-		// TODO: resume
 	}
+
+	// Connected, start handling connection and events.
+	go s.handleConnection(ctx)
 
 	return nil
 }
 
+// HandleConnection handles the connection by listening to the signals.
 func (s *Session) handleConnection(ctx context.Context) {
 	// Var to store whether to reconnect after disconnecting.
 	var reconnect bool
@@ -112,7 +126,7 @@ func (s *Session) handleConnection(ctx context.Context) {
 	s.wg.Wait()
 
 	// Close session.
-	err := s.ws.Close(websocket.StatusNormalClosure, "")
+	err := s.ws.Close(websocket.StatusInternalError, "")
 	if err != nil {
 		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID))
 		return
@@ -131,6 +145,7 @@ func (s *Session) handleConnection(ctx context.Context) {
 	}
 }
 
+// Heartbeat sends heartbeats at the specified interval.
 func (s *Session) heartbeat(ctx context.Context) {
 	// Create ticker.
 	ticker := time.NewTicker(s.heartbeatState.Interval)
@@ -178,7 +193,8 @@ func (s *Session) heartbeat(ctx context.Context) {
 	}
 }
 
-func (s *Session) readHello(ctx context.Context) error {
+// Hello handles the hello payload.
+func (s *Session) hello(ctx context.Context) error {
 	// Read payload.
 	payload, err := s.readPayload(ctx)
 	if err != nil {
@@ -204,11 +220,12 @@ func (s *Session) readHello(ctx context.Context) error {
 	return nil
 }
 
+// SendHeartbeat sends a heartbeat payload.
 func (s *Session) sendHeartbeat(ctx context.Context) error {
 	// Create payload.
 	payload := heartbeatPayload{
 		Op: uint(OpcodeHeartbeat),
-		D:  0,
+		D:  atomic.LoadUint64(&s.sequence),
 	}
 
 	// Marshal payload.
@@ -225,6 +242,7 @@ func (s *Session) sendHeartbeat(ctx context.Context) error {
 	return nil
 }
 
+// Identify handles the identify payload.
 func (s *Session) identify(ctx context.Context) error {
 	// Create payload.
 	payload := identifyPayload{
@@ -251,6 +269,7 @@ func (s *Session) identify(ctx context.Context) error {
 	return nil
 }
 
+// ReadPayload reads a payload from the websocket.
 func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Read payload.
 	msgType, msg, err := s.ws.Read(ctx)
@@ -280,6 +299,7 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	return &payload, nil
 }
 
+// SendPayload sends a payload on the websocket.
 func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	// Unmarshal payload.
 	data, err := marshal(payload)
@@ -291,6 +311,22 @@ func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	err = s.ws.Write(ctx, websocket.MessageText, data)
 	if err != nil {
 		return xerrors.Errorf("failed to send payload: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Session) resume(ctx context.Context) error {
+	// Create payload.
+	payload := resumePayload{
+		Token:     s.token,
+		SessionID: s.sessionID,
+		Seq:       s.sequence,
+	}
+
+	// Send payload.
+	if err := s.sendPayload(ctx, payload); err != nil {
+		return xerrors.Errorf("failed to send resume payload: %w", err)
 	}
 
 	return nil

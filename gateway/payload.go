@@ -4,7 +4,7 @@ import "encoding/json"
 
 type heartbeatPayload struct {
 	Op uint  `json:"op"`
-	D  int64 `json:"d"`
+	D  uint64 `json:"d"`
 }
 
 type helloData struct {
@@ -36,4 +36,10 @@ type payload struct {
 	D  json.RawMessage `json:"d"`
 	S  uint            `json:"s"`
 	T  string          `json:"t"`
+}
+
+type resumePayload struct {
+	Token     string `json:"token"`
+	SessionID string `json:"session_id"`
+	Seq       uint64 `json:"seq"`
 }
