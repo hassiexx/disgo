@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -13,6 +14,13 @@ import (
 type heartbeatPayload struct {
 	Op uint   `json:"op"`
 	D  uint64 `json:"d"`
+}
+
+type heartbeatState struct {
+	sync.Mutex
+	Interval          time.Duration
+	LastHeartbeatAck  time.Time
+	LastHeartbeatSend time.Time
 }
 
 // Heartbeat sends heartbeats at the specified interval.
