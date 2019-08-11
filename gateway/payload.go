@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"golang.org/x/xerrors"
 	"nhooyr.io/websocket"
@@ -19,28 +18,22 @@ type payload struct {
 // ReadPayload reads a payload from the websocket.
 func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Read payload.
-	msgType, msg, err := s.ws.Read(ctx)
+	msgType, r, err := s.ws.Reader(ctx)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to read payload: %w", err)
 	}
 
-	// Get payload data.
-	var data []byte
+	// Get payload.
+	var payload payload
 	if msgType == websocket.MessageBinary {
-		// Decompress payload.
-		fmt.Println(msg)
-		data, err = decompress(msg)
-		if err != nil {
+		// Decompress and unmarshal.
+		if err = decompressUnmarshal(r, &payload); err != nil {
 			return nil, xerrors.Errorf("failed to decompress payload: %w", err)
 		}
 	} else {
-		data = msg
-	}
-
-	// Unmarshal payload into json.
-	var payload payload
-	if err = unmarshal(data, &payload); err != nil {
-		return nil, xerrors.Errorf("failed to unmarshal payload: %w", err)
+		if err = unmarshal(r, &payload); err != nil {
+			return nil, xerrors.Errorf("failed to unmarshal payload: %w", err)
+		}
 	}
 
 	return &payload, nil
@@ -48,14 +41,20 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 
 // SendPayload sends a payload on the websocket.
 func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
-	// Unmarshal payload.
-	data, err := marshal(payload)
+	// Get writer.
+	w, err := s.ws.Writer(ctx, websocket.MessageText)
 	if err != nil {
+		return xerrors.Errorf("failed to get websocket writer: %w", err)
+	}
+
+	// Marshal payload.
+	if err = marshal(w, payload); err != nil {
+		_ = w.Close()
 		return xerrors.Errorf("failed to marshal payload: %w", err)
 	}
 
-	// Send payload.
-	if err = s.ws.Write(ctx, websocket.MessageText, data); err != nil {
+	// Send payload by closing the writer.
+	if err = w.Close(); err != nil {
 		return xerrors.Errorf("failed to send payload: %w", err)
 	}
 

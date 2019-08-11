@@ -26,7 +26,7 @@ func (s *Session) hello(ctx context.Context) error {
 
 	// Unmarshal payload data.
 	var helloData helloData
-	if err = unmarshal(payload.D, &helloData); err != nil {
+	if err = unmarshalRaw(payload.D, &helloData); err != nil {
 		return xerrors.Errorf("failed to unmarshal hello payload: %w", err)
 	}
 
