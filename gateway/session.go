@@ -76,19 +76,14 @@ func (s *Session) Open(ctx context.Context) error {
 
 	// If we have a sequence number or a session ID, attempt to resume,
 	// otherwise create a new session.
-	newSession := true
 	if s.sequence != 0 || s.sessionID != "" {
 		// Resume.
 		s.log.Debug("resuming session")
 		if err = s.resume(ctx); err != nil {
-			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID), zap.Error(err))
-		} else {
-			newSession = false
+			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID))
+			return err
 		}
-	}
-
-	// Check if a new session should be created.
-	if newSession {
+	} else {
 		// Identify.
 		if err = s.identify(ctx); err != nil {
 			return xerrors.Errorf("failed to identify: %w", err)
@@ -124,7 +119,7 @@ func (s *Session) handleConnection(ctx context.Context) {
 	// Close session.
 	err := s.ws.Close(websocket.StatusInternalError, "")
 	if err != nil {
-		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID))
+		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID), zap.Error(err))
 		return
 	}
 
@@ -132,7 +127,7 @@ func (s *Session) handleConnection(ctx context.Context) {
 		// Reopen session.
 		err := s.Open(ctx)
 		if err != nil {
-			s.log.Info("failed to reconnect websocket", zap.Uint("shard", s.shardID))
+			s.log.Info("failed to reconnect websocket", zap.Uint("shard", s.shardID), zap.Error(err))
 		}
 	} else {
 		// Reset session state.
