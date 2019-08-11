@@ -64,8 +64,7 @@ func (s *Session) Open(ctx context.Context) error {
 
 	// Read hello payload.
 	s.log.Debug("receiving hello payload", zap.Uint("shard", s.shardID))
-	err = s.hello(ctx)
-	if err != nil {
+	if err = s.hello(ctx); err != nil {
 		close(s.done)
 		return xerrors.Errorf("failed to read hello payload: %w", err)
 	}
@@ -117,16 +116,14 @@ func (s *Session) handleConnection(ctx context.Context) {
 	s.wg.Wait()
 
 	// Close session.
-	err := s.ws.Close(websocket.StatusInternalError, "")
-	if err != nil {
+	if err := s.ws.Close(websocket.StatusInternalError, ""); err != nil {
 		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID), zap.Error(err))
 		return
 	}
 
 	if reconnect {
 		// Reopen session.
-		err := s.Open(ctx)
-		if err != nil {
+		if err := s.Open(ctx); err != nil {
 			s.log.Info("failed to reconnect websocket", zap.Uint("shard", s.shardID), zap.Error(err))
 		}
 	} else {

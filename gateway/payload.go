@@ -55,8 +55,7 @@ func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	}
 
 	// Send payload.
-	err = s.ws.Write(ctx, websocket.MessageText, data)
-	if err != nil {
+	if err = s.ws.Write(ctx, websocket.MessageText, data); err != nil {
 		return xerrors.Errorf("failed to send payload: %w", err)
 	}
 

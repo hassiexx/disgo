@@ -8,7 +8,6 @@ import (
 
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
-	"nhooyr.io/websocket"
 )
 
 type heartbeatPayload struct {
@@ -48,8 +47,7 @@ func (s *Session) heartbeat(ctx context.Context) {
 			// Send heartbeat.
 			s.log.Debug("sending heartbeat", zap.Uint("shard", s.shardID))
 			s.heartbeatState.LastHeartbeatSend = time.Now().UTC()
-			err := s.sendHeartbeat(ctx)
-			if err != nil {
+			if err := s.sendHeartbeat(ctx); err != nil {
 				// Signal reconnect.
 				s.disconnect <- true
 			}
@@ -79,14 +77,8 @@ func (s *Session) sendHeartbeat(ctx context.Context) error {
 		D:  atomic.LoadUint64(&s.sequence),
 	}
 
-	// Marshal payload.
-	data, err := marshal(payload)
-	if err != nil {
-		return xerrors.Errorf("failed to marshal heartbeat payload: %w", err)
-	}
-
 	// Send payload.
-	if err = s.ws.Write(ctx, websocket.MessageText, data); err != nil {
+	if err := s.sendPayload(ctx, payload); err != nil {
 		return xerrors.Errorf("failed to send heartbeat payload: %w", err)
 	}
 

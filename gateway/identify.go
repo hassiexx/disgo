@@ -46,8 +46,7 @@ func (s *Session) identify(ctx context.Context) error {
 		},
 	}
 
-	err := s.sendPayload(ctx, payload)
-	if err != nil {
+	if err := s.sendPayload(ctx, payload); err != nil {
 		return xerrors.Errorf("failed to send identify payload: %w", err)
 	}
 
