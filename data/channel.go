@@ -3,7 +3,7 @@ package data
 import (
 	"time"
 
-	dgoflake "github.com/hassieswift621/discord-goflake"
+	snowflake "github.com/hassieswift621/discord-goflake"
 )
 
 // ChannelType is the type for channel type constants.
@@ -21,35 +21,35 @@ const (
 
 // Channel is the interface for a channel.
 type Channel interface {
-	ID() *dgoflake.Snowflake
+	ID() *snowflake.Snowflake
 	Type() ChannelType
 }
 
 // DMChannel is an immutable struct for a DM channel.
 type DMChannel struct {
 	channelType   ChannelType
-	id            *dgoflake.Snowflake
-	lastMessageID *dgoflake.Snowflake
+	id            *snowflake.Snowflake
+	lastMessageID *snowflake.Snowflake
 	recipient     *User
 }
 
 // GroupDMChannel is an immutable struct for a group DM channel.
 type GroupDMChannel struct {
-	applicationID *dgoflake.Snowflake
+	applicationID *snowflake.Snowflake
 	channelType   ChannelType
 	iconHash      string
-	id            *dgoflake.Snowflake
-	ownerID       *dgoflake.Snowflake
-	lastMessageID *dgoflake.Snowflake
+	id            *snowflake.Snowflake
+	ownerID       *snowflake.Snowflake
+	lastMessageID *snowflake.Snowflake
 	recipients    []*User
 }
 
 // GuildChannel is the interface for a guild channel.
 type GuildChannel interface {
-	Guild() *dgoflake.Snowflake
-	ID() *dgoflake.Snowflake
+	Guild() *snowflake.Snowflake
+	ID() *snowflake.Snowflake
 	Name() string
-	ParentID() *dgoflake.Snowflake
+	ParentID() *snowflake.Snowflake
 	PermissionOverwrites()
 	Position() uint
 	Type() ChannelType
@@ -58,13 +58,13 @@ type GuildChannel interface {
 // GuildNewsChannel is an immutable struct for a guild news channel.
 type GuildNewsChannel struct {
 	channelType          ChannelType
-	guildID              *dgoflake.Snowflake
-	id                   *dgoflake.Snowflake
-	lastMessageID        *dgoflake.Snowflake
+	guildID              *snowflake.Snowflake
+	id                   *snowflake.Snowflake
+	lastMessageID        *snowflake.Snowflake
 	lastPinTimestamp     time.Time
 	name                 string
 	nsfw                 bool
-	parentID             *dgoflake.Snowflake
+	parentID             *snowflake.Snowflake
 	permissionOverwrites []struct{}
 	position             uint
 	rateLimitPerUser     uint
@@ -74,13 +74,13 @@ type GuildNewsChannel struct {
 // GuildTextChannel is an immutable struct for a guild text channel.
 type GuildTextChannel struct {
 	channelType          ChannelType
-	guildID              *dgoflake.Snowflake
-	id                   *dgoflake.Snowflake
-	lastMessageID        *dgoflake.Snowflake
+	guildID              *snowflake.Snowflake
+	id                   *snowflake.Snowflake
+	lastMessageID        *snowflake.Snowflake
 	lastPinTimestamp     time.Time
 	name                 string
 	nsfw                 bool
-	parentID             *dgoflake.Snowflake
+	parentID             *snowflake.Snowflake
 	permissionOverwrites []struct{}
 	position             uint
 	rateLimitPerUser     uint
@@ -91,11 +91,11 @@ type GuildTextChannel struct {
 type GuildVoiceChannel struct {
 	bitrate              uint
 	channelType          ChannelType
-	guildID              *dgoflake.Snowflake
-	id                   *dgoflake.Snowflake
+	guildID              *snowflake.Snowflake
+	id                   *snowflake.Snowflake
 	name                 string
 	nsfw                 bool
-	parentID             *dgoflake.Snowflake
+	parentID             *snowflake.Snowflake
 	permissionOverwrites []struct{}
 	position             uint
 	userLimit            uint

@@ -1,6 +1,6 @@
 package data
 
-import dgoflake "github.com/hassieswift621/discord-goflake"
+import snowflake "github.com/hassieswift621/discord-goflake"
 
 // UserState is the struct used to store raw user state.
 type UserState struct {
@@ -27,7 +27,7 @@ type UserState struct {
 // ToImmutableUser clones the user state and returns an immutable user type.
 func (u *UserState) ToImmutableUser() *User {
 	// Convert user ID to snowflake.
-	snowflake, _ := dgoflake.ParseString(u.ID)
+	snowflake, _ := snowflake.ParseString(u.ID)
 
 	return &User{
 		avatarHash:    u.AvatarHash,
@@ -48,7 +48,7 @@ type User struct {
 	bot           bool
 	discriminator string
 	flags         Flags
-	id            *dgoflake.Snowflake
+	id            *snowflake.Snowflake
 	locale        string
 	mfaEnabled    bool
 	premiumType   PremiumType
@@ -76,7 +76,7 @@ func (u *User) Flags() Flags {
 }
 
 // ID gets the user's unqiue snowflake ID.
-func (u *User) ID() *dgoflake.Snowflake {
+func (u *User) ID() *snowflake.Snowflake {
 	return u.id
 }
 
