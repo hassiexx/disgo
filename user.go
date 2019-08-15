@@ -2,46 +2,6 @@ package data
 
 import snowflake "github.com/hassieswift621/discord-goflake"
 
-// UserState is the struct used to store raw user state.
-type UserState struct {
-	// The user's avatar hash.
-	AvatarHash string `json:"avatar"`
-	// Whether the user is a bot.
-	Bot bool `json:"bot"`
-	// The user's 4 digit discriminator.
-	Discriminator string `json:"discriminator"`
-	// The user's profile flags, also called badges.
-	Flags uint `json:"flags"`
-	// The user's snowflake ID.
-	ID string `json:"id"`
-	// The user's locale.
-	Locale string `json:"locale"`
-	// Whether the user has MFA enabled.
-	MFAEnabled bool `json:"mfa_enabled"`
-	// The user's Nitro subscription type.
-	PremiumType uint `json:"premium_type"`
-	// The user's username.
-	Username string
-}
-
-// ToImmutableUser clones the user state and returns an immutable user type.
-func (u *UserState) ToImmutableUser() *User {
-	// Convert user ID to snowflake.
-	snowflake, _ := snowflake.ParseString(u.ID)
-
-	return &User{
-		avatarHash:    u.AvatarHash,
-		bot:           u.Bot,
-		discriminator: u.Discriminator,
-		flags:         Flags(u.Flags),
-		id:            snowflake,
-		locale:        u.Locale,
-		mfaEnabled:    u.MFAEnabled,
-		premiumType:   PremiumType(u.PremiumType),
-		username:      u.Username,
-	}
-}
-
 // User is an immutable struct for a user.
 type User struct {
 	avatarHash    string
