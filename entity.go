@@ -1,4 +1,4 @@
-package data
+package disgo
 
 import (
 	snowflake "github.com/hassieswift621/discord-goflake"
