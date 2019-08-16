@@ -102,7 +102,7 @@ func (c *GroupDMChannel) OwnerID() *snowflake.Snowflake {
 func (c *GroupDMChannel) Recipients() []*User {
 	// Copy slice.
 	recipients := make([]*User, len(c.recipients))
-	copy(c.recipients, recipients)
+	copy(recipients, c.recipients)
 
 	return recipients
 }
@@ -114,66 +114,24 @@ func (c *GroupDMChannel) Type() ChannelType {
 
 // GuildChannel is the interface for a guild channel.
 type GuildChannel interface {
+	// GuildID gets the snowflake ID of the guild.
 	GuildID() *snowflake.Snowflake
+	// ID gets the snowflake ID of the channel.
 	ID() *snowflake.Snowflake
+	// Name gets the name of the channel.
 	Name() string
+	// ParentID gets the snowflake ID of the category if this channel is categorised.
 	ParentID() *snowflake.Snowflake
-	PermissionOverwrites()
+	// PermissionOverwrites gets the permission overwrites for the channel.
+	PermissionOverwrites() []*PermissionOverwrite
+	// Position gets the position of the channel.
 	Position() uint
+	// Type gets the channel type.
 	Type() ChannelType
 }
 
 // GuildNewsChannel is an immutable struct for a guild news channel.
-type GuildNewsChannel struct {
-	channelType          ChannelType
-	guildID              *snowflake.Snowflake
-	id                   *snowflake.Snowflake
-	lastMessageID        *snowflake.Snowflake
-	lastPinTimestamp     time.Time
-	name                 string
-	nsfw                 bool
-	parentID             *snowflake.Snowflake
-	permissionOverwrites []struct{}
-	position             uint
-	rateLimitPerUser     uint
-	topic                string
-}
-
-// GuildID gets the snowflake ID of the guild.
-func (c *GuildNewsChannel) GuildID() *snowflake.Snowflake {
-	return c.guildID
-}
-
-// ID gets the snowflake ID of the channel.
-func (c *GuildNewsChannel) ID() *snowflake.Snowflake {
-	return c.id
-}
-
-// IsNSFW returns whether the channel is set as NSFW.
-func (c *GuildNewsChannel) IsNSFW() bool {
-	return c.nsfw
-}
-
-// LastMessageID gets the snowflake ID of the last message sent.
-// This may or may not point to a deleted message.
-func (c *GuildNewsChannel) LastMessageID() *snowflake.Snowflake {
-	return c.lastMessageID
-}
-
-// LastPinTimestamp gets the timestamp of the last pinned message.
-func (c *GuildNewsChannel) LastPinTimestamp() time.Time {
-	return c.lastPinTimestamp
-}
-
-// ParentID gets the snowflake ID of the category if this channel is categorised.
-func (c *GuildNewsChannel) ParentID() *snowflake.Snowflake {
-	return c.parentID
-}
-
-// Type gets the channel type.
-func (c *GuildNewsChannel) Type() ChannelType {
-	return c.channelType
-}
+type GuildNewsChannel GuildTextChannel
 
 // GuildTextChannel is an immutable struct for a guild text channel.
 type GuildTextChannel struct {
@@ -191,6 +149,71 @@ type GuildTextChannel struct {
 	topic                string
 }
 
+// GuildID gets the snowflake ID of the guild.
+func (c *GuildTextChannel) GuildID() *snowflake.Snowflake {
+	return c.guildID
+}
+
+// ID gets the snowflake ID of the channel.
+func (c *GuildTextChannel) ID() *snowflake.Snowflake {
+	return c.id
+}
+
+// IsNSFW returns whether the channel is set as NSFW.
+func (c *GuildTextChannel) IsNSFW() bool {
+	return c.nsfw
+}
+
+// LastMessageID gets the snowflake ID of the last message sent.
+// This may or may not point to a deleted message.
+func (c *GuildTextChannel) LastMessageID() *snowflake.Snowflake {
+	return c.lastMessageID
+}
+
+// LastPinTimestamp gets the timestamp of the last pinned message.
+func (c *GuildTextChannel) LastPinTimestamp() time.Time {
+	return c.lastPinTimestamp
+}
+
+// Name gets the name of the channel.
+func (c *GuildTextChannel) Name() string {
+	return c.name
+}
+
+// ParentID gets the snowflake ID of the category if this channel is categorised.
+func (c *GuildTextChannel) ParentID() *snowflake.Snowflake {
+	return c.parentID
+}
+
+// PermissionOverwrites gets the permission overwrites for the channel.
+func (c *GuildTextChannel) PermissionOverwrites() []*PermissionOverwrite {
+	// Copy slice.
+	overwrites := make([]*PermissionOverwrite, len(c.permissionOverwrites))
+	copy(overwrites, c.permissionOverwrites)
+
+	return overwrites
+}
+
+// Position gets the position of the channel.
+func (c *GuildTextChannel) Position() uint {
+	return c.position
+}
+
+// RateLimitPerUser gets the rate limit for the channel in seconds.
+func (c *GuildTextChannel) RateLimitPerUser() uint {
+	return c.rateLimitPerUser
+}
+
+// Topic gets the channel topic.
+func (c *GuildTextChannel) Topic() string {
+	return c.topic
+}
+
+// Type gets the channel type.
+func (c *GuildTextChannel) Type() ChannelType {
+	return c.channelType
+}
+
 // GuildVoiceChannel is an immutable struct for a guild voice channel.
 type GuildVoiceChannel struct {
 	bitrate              uint
@@ -203,4 +226,58 @@ type GuildVoiceChannel struct {
 	permissionOverwrites []*PermissionOverwrite
 	position             uint
 	userLimit            uint
+}
+
+// Bitrate gets the bitrate of the channel in bits.
+func (c *GuildVoiceChannel) Bitrate() uint {
+	return c.bitrate
+}
+
+// GuildID gets the snowflake ID of the guild.
+func (c *GuildVoiceChannel) GuildID() *snowflake.Snowflake {
+	return c.guildID
+}
+
+// ID gets the snowflake ID of the channel.
+func (c *GuildVoiceChannel) ID() *snowflake.Snowflake {
+	return c.id
+}
+
+// IsNSFW returns whether the channel is set as NSFW.
+func (c *GuildVoiceChannel) IsNSFW() bool {
+	return c.nsfw
+}
+
+// Name gets the name of the channel.
+func (c *GuildVoiceChannel) Name() string {
+	return c.name
+}
+
+// ParentID gets the snowflake ID of the category if this channel is categorised.
+func (c *GuildVoiceChannel) ParentID() *snowflake.Snowflake {
+	return c.parentID
+}
+
+// PermissionOverwrites gets the permission overwrites for the channel.
+func (c *GuildVoiceChannel) PermissionOverwrites() []*PermissionOverwrite {
+	// Copy slice.
+	overwrites := make([]*PermissionOverwrite, len(c.permissionOverwrites))
+	copy(overwrites, c.permissionOverwrites)
+
+	return overwrites
+}
+
+// Position gets the position of the channel.
+func (c *GuildVoiceChannel) Position() uint {
+	return c.position
+}
+
+// Type gets the channel type.
+func (c *GuildVoiceChannel) Type() ChannelType {
+	return c.channelType
+}
+
+// UserLimit gets the user limit of the channel.
+func (c *GuildVoiceChannel) UserLimit() uint {
+	return c.userLimit
 }
