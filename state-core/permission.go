@@ -1,7 +1,7 @@
 package statecore
 
-// PermissionOverwriteState is the struct used to store raw permission overwrite state data.
-type PermissionOverwriteState struct {
+// PermissionOverwrite is a struct for raw permission overwrite state data.
+type PermissionOverwrite struct {
 	// Allowed permissions bit set.
 	Allow uint `json:"allow"`
 	// Denied permissions bit set.
