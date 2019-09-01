@@ -1,69 +1,69 @@
 package statecore
 
-// Embed is a struct for raw embed state data.
+// Embed is a struct for an embed state.
 type Embed struct {
-	Author      *EmbedAuthor    `json:"author"`
-	Colour      uint            `json:"color"`
-	Description string          `json:"description"`
-	Fields      []*EmbedField   `json:"fields"`
-	Footer      *EmbedFooter    `json:"footer"`
-	Image       *EmbedImage     `json:"image"`
-	Provider    *EmbedProvider  `json:"provider"`
-	Thumbnail   *EmbedThumbnail `json:"thumbnail"`
-	Timestamp   string          `json:"timestamp"`
-	Title       string          `json:"title"`
-	Type        string          `json:"type"`
-	URL         string          `json:"url"`
-	Video       *EmbedVideo     `json:"video"`
+	Author      *EmbedAuthor
+	Colour      uint
+	Description string
+	Fields      []*EmbedField
+	Footer      *EmbedFooter
+	Image       *EmbedImage
+	Provider    *EmbedProvider
+	Thumbnail   *EmbedThumbnail
+	Timestamp   string
+	Title       string
+	Type        string
+	URL         string
+	Video       *EmbedVideo
 }
 
-// EmbedAuthor is a struct for raw embed author state data.
+// EmbedAuthor is a struct for an embed author state.
 type EmbedAuthor struct {
-	IconURL  string `json:"icon_url"`
-	Name     string `json:"name"`
-	ProxyURL string `json:"proxy_url"`
-	URL      string `json:"url"`
+	IconURL  string
+	Name     string
+	ProxyURL string
+	URL      string
 }
 
-// EmbedField is a struct for raw embed field state data.
+// EmbedField is a struct for an embed field state.
 type EmbedField struct {
-	Inline bool   `json:"inline"`
-	Name   string `json:"name"`
-	Value  string `json:"value"`
+	Inline bool
+	Name   string
+	Value  string
 }
 
-// EmbedFooter is a struct for raw embed footer state data.
+// EmbedFooter is a struct for an embed footer state.
 type EmbedFooter struct {
-	IconURL  string `json:"icon_url"`
-	ProxyURL string `json:"proxy_url"`
-	Text     string `json:"text"`
+	IconURL  string
+	ProxyURL string
+	Text     string
 }
 
-// EmbedImage is a struct for raw embed image state data.
+// EmbedImage is a struct for an embed image state.
 type EmbedImage struct {
-	Height   uint   `json:"height"`
-	ProxyURL string `json:"proxy_url"`
-	URL      string `json:"url"`
-	Width    uint   `json:"width"`
+	Height   uint
+	ProxyURL string
+	URL      string
+	Width    uint
 }
 
-// EmbedProvider is a struct for raw embed provider state data.
+// EmbedProvider is a struct for an embed provider state.
 type EmbedProvider struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
+	Name string
+	URL  string
 }
 
-// EmbedThumbnail is a struct for raw embed thumbnail state data.
+// EmbedThumbnail is a struct for an embed thumbnail state.
 type EmbedThumbnail struct {
-	Height   uint   `json:"height"`
-	ProxyURL string `json:"proxy_url"`
-	URL      string `json:"url"`
-	Width    uint   `json:"width"`
+	Height   uint
+	ProxyURL string
+	URL      string
+	Width    uint
 }
 
-// EmbedVideo is a struct for raw embed video state data.
+// EmbedVideo is a struct for an embed video state.
 type EmbedVideo struct {
-	Height uint   `json:"height"`
-	URL    string `json:"url"`
-	Width  uint   `json:"width"`
+	Height uint
+	URL    string
+	Width  uint
 }

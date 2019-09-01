@@ -1,14 +1,14 @@
 package statecore
 
-// User is a struct for raw user state data.
+// User is a struct for a user state.
 type User struct {
-	AvatarHash    string `json:"avatar"`
-	Bot           bool   `json:"bot"`
-	Discriminator string `json:"discriminator"`
-	Flags         uint   `json:"flags"`
-	ID            string `json:"id"`
-	Locale        string `json:"locale"`
-	MFAEnabled    bool   `json:"mfa_enabled"`
-	PremiumType   uint   `json:"premium_type"`
-	Username      string `json:"username"`
+	AvatarHash    string
+	Bot           bool
+	Discriminator string
+	Flags         uint
+	ID            string
+	Locale        string
+	MFAEnabled    bool
+	PremiumType   uint
+	Username      string
 }

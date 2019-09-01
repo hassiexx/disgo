@@ -1,13 +1,13 @@
 package statecore
 
-// Role is a struct for raw role state data.
+// Role is a struct for a role state.
 type Role struct {
-	Colour      uint   `json:"color"`
-	Hoist       bool   `json:"hoist"`
-	ID          string `json:"id"`
-	Managed     bool   `json:"managed"`
-	Mentionable bool   `json:"mentionable"`
-	Name        string `json:"name"`
-	Permissions uint   `json:"permissions"`
-	Position    uint   `json:"position"`
+	Colour      uint
+	Hoist       bool
+	ID          string
+	Managed     bool
+	Mentionable bool
+	Name        string
+	Permissions uint
+	Position    uint
 }
