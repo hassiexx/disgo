@@ -130,6 +130,64 @@ type GuildChannel interface {
 	Type() ChannelType
 }
 
+// GuildChannelCategory is an immutable struct for a guild channel category.
+type GuildChannelCategory struct {
+	channelType          ChannelType
+	guildID              *snowflake.Snowflake
+	id                   *snowflake.Snowflake
+	name                 string
+	nsfw                 bool
+	parentID             *snowflake.Snowflake
+	permissionOverwrites []*PermissionOverwrite
+	position             uint
+}
+
+// GuildID gets the snowflake ID of the guild.
+func (c *GuildChannelCategory) GuildID() *snowflake.Snowflake {
+	return c.guildID
+}
+
+// ID gets the snowflake ID of the category.
+func (c *GuildChannelCategory) ID() *snowflake.Snowflake {
+	return c.id
+}
+
+// IsNSFW returns whether the category is set as NSFW.
+func (c *GuildChannelCategory) IsNSFW() bool {
+	return c.nsfw
+}
+
+// Name gets the name of the category.
+func (c *GuildChannelCategory) Name() string {
+	return c.name
+}
+
+// ParentID gets the snowflake ID of the category.
+// For now this will return nil as Discord does not support sub-categories.
+// However, this has been left in as parent ID is returned with the response.
+func (c *GuildChannelCategory) ParentID() *snowflake.Snowflake {
+	return c.parentID
+}
+
+// PermissionOverwrites gets the permission overwrites for the category.
+func (c *GuildChannelCategory) PermissionOverwrites() []*PermissionOverwrite {
+	// Copy slice.
+	overwrites := make([]*PermissionOverwrite, len(c.permissionOverwrites))
+	copy(overwrites, c.permissionOverwrites)
+
+	return overwrites
+}
+
+// Position gets the position of the category.
+func (c *GuildChannelCategory) Position() uint {
+	return c.position
+}
+
+// Type gets the channel type.
+func (c *GuildChannelCategory) Type() ChannelType {
+	return c.channelType
+}
+
 // GuildNewsChannel is an immutable struct for a guild news channel.
 type GuildNewsChannel GuildTextChannel
 
@@ -211,6 +269,62 @@ func (c *GuildTextChannel) Topic() string {
 
 // Type gets the channel type.
 func (c *GuildTextChannel) Type() ChannelType {
+	return c.channelType
+}
+
+// GuildStoreChannel is an immutable struct for a guild store channel.
+type GuildStoreChannel struct {
+	channelType          ChannelType
+	guildID              *snowflake.Snowflake
+	id                   *snowflake.Snowflake
+	name                 string
+	nsfw                 bool
+	parentID             *snowflake.Snowflake
+	permissionOverwrites []*PermissionOverwrite
+	position             uint
+}
+
+// GuildID gets the snowflake ID of the guild.
+func (c *GuildStoreChannel) GuildID() *snowflake.Snowflake {
+	return c.guildID
+}
+
+// ID gets the snowflake ID of the channel.
+func (c *GuildStoreChannel) ID() *snowflake.Snowflake {
+	return c.id
+}
+
+// IsNSFW returns whether the channel is set as NSFW.
+func (c *GuildStoreChannel) IsNSFW() bool {
+	return c.nsfw
+}
+
+// Name gets the name of the channel.
+func (c *GuildStoreChannel) Name() string {
+	return c.name
+}
+
+// ParentID gets the snowflake ID of the category if this channel is categorised.
+func (c *GuildStoreChannel) ParentID() *snowflake.Snowflake {
+	return c.parentID
+}
+
+// PermissionOverwrites gets the permission overwrites for the channel.
+func (c *GuildStoreChannel) PermissionOverwrites() []*PermissionOverwrite {
+	// Copy slice.
+	overwrites := make([]*PermissionOverwrite, len(c.permissionOverwrites))
+	copy(overwrites, c.permissionOverwrites)
+
+	return overwrites
+}
+
+// Position gets the position of the channel.
+func (c *GuildStoreChannel) Position() uint {
+	return c.position
+}
+
+// Type gets the channel type.
+func (c *GuildStoreChannel) Type() ChannelType {
 	return c.channelType
 }
 
