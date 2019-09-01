@@ -88,10 +88,10 @@ func (e *Embed) Video() *EmbedVideo {
 
 // EmbedAuthor is an immutable struct for an embed author.
 type EmbedAuthor struct {
-	iconURL      string
-	name         string
-	proxyIconURL string
-	url          string
+	iconURL  string
+	name     string
+	proxyURL string
+	url      string
 }
 
 // IconURL gets the URL of the author icon.
@@ -104,9 +104,9 @@ func (a *EmbedAuthor) Name() string {
 	return a.name
 }
 
-// ProxyIconURL gets the proxied URL of the author icon.
-func (a *EmbedAuthor) ProxyIconURL() string {
-	return a.proxyIconURL
+// ProxyURL gets the proxied URL of the author icon.
+func (a *EmbedAuthor) ProxyURL() string {
+	return a.proxyURL
 }
 
 // URL gets the author's URL.
@@ -138,9 +138,9 @@ func (f *EmbedField) Value() string {
 
 // EmbedFooter is an immutable struct for an embed footer.
 type EmbedFooter struct {
-	iconURL      string
-	proxyIconURL string
-	text         string
+	iconURL  string
+	proxyURL string
+	text     string
 }
 
 // IconURL gets the URL of the footer icon.
@@ -148,9 +148,9 @@ func (f *EmbedFooter) IconURL() string {
 	return f.iconURL
 }
 
-// ProxyIconURL gets the proxied URL of the footer icon.
-func (f *EmbedFooter) ProxyIconURL() string {
-	return f.proxyIconURL
+// ProxyURL gets the proxied URL of the footer icon.
+func (f *EmbedFooter) ProxyURL() string {
+	return f.proxyURL
 }
 
 // Text gets the footer text.
