@@ -1,8 +1,6 @@
 package disgo
 
 import (
-	"time"
-
 	snowflake "github.com/hassieswift621/discord-goflake"
 )
 
@@ -197,7 +195,7 @@ type GuildTextChannel struct {
 	guildID              *snowflake.Snowflake
 	id                   *snowflake.Snowflake
 	lastMessageID        *snowflake.Snowflake
-	lastPinTimestamp     time.Time
+	lastPinTimestamp     Timestamp
 	name                 string
 	nsfw                 bool
 	parentID             *snowflake.Snowflake
@@ -229,7 +227,7 @@ func (c *GuildTextChannel) LastMessageID() *snowflake.Snowflake {
 }
 
 // LastPinTimestamp gets the timestamp of the last pinned message.
-func (c *GuildTextChannel) LastPinTimestamp() time.Time {
+func (c *GuildTextChannel) LastPinTimestamp() Timestamp {
 	return c.lastPinTimestamp
 }
 
