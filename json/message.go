@@ -28,6 +28,17 @@ type Message struct {
 	WebhookID        string              `json:"webhook_id"`
 }
 
+// Attachment is a struct for a message attachment.
+type Attachment struct {
+	Filename string `json:"filename"`
+	Height   uint   `json:"height"`
+	ID       string `json:"id"`
+	ProxyURL string `json:"proxy_url"`
+	Size     uint   `json:"size"`
+	URL      string `json:"url"`
+	Width    uint   `json:"width"`
+}
+
 // ChannelMention is a struct for a channel mention in a message.
 type ChannelMention struct {
 	GuildID string `json:"guild_id"`
