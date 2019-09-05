@@ -1,5 +1,12 @@
 package json
 
+import (
+	"encoding/json"
+)
+
+// GuildMembers is a type for the guild members JSON property.
+type GuildMembers map[string]*Member
+
 // Guild is a struct for a guild.
 type Guild struct {
 	AFKChannelID                string        `json:"afk_channel_id"`
@@ -21,7 +28,7 @@ type Guild struct {
 	MaxMembers                  uint          `json:"max_members"`
 	MaxPresences                uint          `json:"max_presences"`
 	MemberCount                 uint          `json:"member_count"`
-	Members                     []*Member     `json:"members"`
+	Members                     GuildMembers  `json:"members"`
 	MFALevel                    uint          `json:"mfa_level"`
 	Name                        string        `json:"name"`
 	Owner                       bool          `json:"owner"`
@@ -41,4 +48,26 @@ type Guild struct {
 	VoiceStates                 []*VoiceState `json:"voice_states"`
 	WidgetChannelID             string        `json:"widget_channel_id"`
 	WidgetEnabled               bool          `json:"widget_enabled"`
+}
+
+// UnmarshalJSON unmarshals the guild members into a map.
+func (g *GuildMembers) UnmarshalJSON(data []byte) error {
+	// Initialise map.
+	*g = make(map[string]*Member)
+
+	// Dereference map.
+	m := *g
+
+	// Unmarshal members.
+	var members []*Member
+	if err := json.Unmarshal(data, &members); err != nil {
+		return err
+	}
+
+	// Add members to map, using the User ID as the key.
+	for _, member := range members {
+		m[member.User.ID] = member
+	}
+
+	return nil
 }
