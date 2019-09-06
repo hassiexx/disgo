@@ -41,4 +41,11 @@ type Guild struct {
 	VoiceStates                 []*VoiceState `json:"voice_states"`
 	WidgetChannelID             string        `json:"widget_channel_id"`
 	WidgetEnabled               bool          `json:"widget_enabled"`
+
+	// For state caching.
+	ChannelSet  StringSet
+	EmojiSet    StringSet
+	MemberSet   StringSet
+	PresenceSet StringSet
+	RoleSet     StringSet
 }
