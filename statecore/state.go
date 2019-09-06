@@ -1,23 +1,23 @@
 package statecore
 
 import (
-	"github.com/hassieswift621/disgo/json"
+	"github.com/hassieswift621/disgo/common/types"
 )
 
 // State is the interface for a state caching implementation.
 type State interface {
 	// Channel gets a channel by its ID.
-	Channel(id string) (*json.Channel, error)
+	Channel(id string) (*types.Channel, error)
 	// Emoji gets an emoji by its ID.
-	Emoji(id string) (*json.Emoji, error)
+	Emoji(id string) (*types.Emoji, error)
 	// Guild gets a guild by its ID.
-	Guild(id string) (*json.Guild, error)
+	Guild(id string) (*types.Guild, error)
 	// Member gets a guild member by their user ID.
-	Member(id string) (*json.Member, error)
+	Member(id string) (*types.Member, error)
 	// Presence gets a user presence by a user ID.
-	Presence(id string) (*json.Presence, error)
+	Presence(id string) (*types.Presence, error)
 	// Role gets a role by its ID.
-	Role(id string) (*json.Role, error)
+	Role(id string) (*types.Role, error)
 	// User gets a user by their ID.
-	User(id string) (*json.User, error)
+	User(id string) (*types.User, error)
 }

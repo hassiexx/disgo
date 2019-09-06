@@ -1,4 +1,4 @@
-package json
+package types
 
 // User is a struct for a user.
 type User struct {

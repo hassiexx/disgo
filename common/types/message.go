@@ -1,4 +1,4 @@
-package json
+package types
 
 // Message is a struct for a message.
 type Message struct {

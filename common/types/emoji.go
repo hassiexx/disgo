@@ -1,4 +1,4 @@
-package json
+package types
 
 // Emoji is a struct for an emoji.
 type Emoji struct {

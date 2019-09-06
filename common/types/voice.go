@@ -1,4 +1,4 @@
-package json
+package types
 
 // VoiceState is a struct for a voice state.
 type VoiceState struct {

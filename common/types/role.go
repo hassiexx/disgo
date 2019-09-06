@@ -1,4 +1,4 @@
-package json
+package types
 
 // Role is a struct for a role.
 type Role struct {

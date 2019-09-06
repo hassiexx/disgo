@@ -1,4 +1,4 @@
-package json
+package types
 
 // Member is a struct for a member.
 type Member struct {

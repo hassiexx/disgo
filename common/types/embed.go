@@ -1,4 +1,4 @@
-package json
+package types
 
 // Embed is a struct for an embed.
 type Embed struct {

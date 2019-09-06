@@ -1,4 +1,4 @@
-package json
+package types
 
 // Channel is a struct for a channel.
 type Channel struct {

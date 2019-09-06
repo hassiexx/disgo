@@ -1,4 +1,4 @@
-package json
+package types
 
 // PermissionOverwrite is a struct for a permission overwrite.
 type PermissionOverwrite struct {

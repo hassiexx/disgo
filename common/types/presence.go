@@ -1,4 +1,4 @@
-package json
+package types
 
 // Presence is a struct for a user's presence.
 type Presence struct {

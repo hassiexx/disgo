@@ -1,4 +1,4 @@
-package json
+package types
 
 // Webhook is a struct for a webhook.
 type Webhook struct {
