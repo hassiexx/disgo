@@ -19,4 +19,7 @@ type Channel struct {
 	Topic                string                 `json:"topic"`
 	Type                 uint                   `json:"type"`
 	UserLimit            uint                   `json:"user_limit"`
+
+	// For state caching.
+	MessageSet StringSet
 }
