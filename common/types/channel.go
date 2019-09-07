@@ -21,5 +21,7 @@ type Channel struct {
 	UserLimit            uint                   `json:"user_limit"`
 
 	// For state caching.
-	MessageSet StringHashSet
+	MessageSet             StringHashSet
+	PermissionOverwriteSet StringHashSet
+	RecipientSet           StringHashSet
 }
