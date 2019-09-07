@@ -9,4 +9,7 @@ type Member struct {
 	PremiumSince string   `json:"premium_since"`
 	Roles        []string `json:"roles"`
 	User         *User    `json:"user"`
+
+	// For state caching.
+	RoleSet StringHashSet
 }

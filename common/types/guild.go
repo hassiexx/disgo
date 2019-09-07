@@ -43,9 +43,9 @@ type Guild struct {
 	WidgetEnabled               bool          `json:"widget_enabled"`
 
 	// For state caching.
-	ChannelSet  StringSet
-	EmojiSet    StringSet
-	MemberSet   StringSet
-	PresenceSet StringSet
-	RoleSet     StringSet
+	ChannelSet  StringHashSet
+	EmojiSet    StringHashSet
+	MemberSet   StringHashSet
+	PresenceSet StringHashSet
+	RoleSet     StringHashSet
 }
