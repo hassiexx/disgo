@@ -90,6 +90,7 @@ type UserMention struct {
 	Avatar        string  `json:"avatar"`
 	Bot           bool    `json:"bot"`
 	Discriminator string  `json:"discriminator"`
+	ID            string  `json:"id"`
 	Username      string  `json:"username"`
 	Member        *Member `json:"member"`
 }
