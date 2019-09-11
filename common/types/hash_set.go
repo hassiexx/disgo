@@ -26,8 +26,8 @@ func (s *StringHashSet) Contains(v string) bool {
 	return exists
 }
 
-// Empty checks whether the hash set is empty.
-func (s *StringHashSet) Empty() bool {
+// IsEmpty checks whether the hash set is empty.
+func (s *StringHashSet) IsEmpty() bool {
 	return len(s.m) == 0
 }
 
