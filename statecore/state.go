@@ -6,18 +6,30 @@ import (
 
 // State is the interface for a state caching implementation.
 type State interface {
-	// Channel gets a channel by its ID.
+	// Channel gets a channel.
 	Channel(id string) (*types.Channel, error)
-	// Emoji gets an emoji by its ID.
+
+	// Emoji gets an emoji.
 	Emoji(id string) (*types.Emoji, error)
-	// Guild gets a guild by its ID.
+
+	// Guild gets a guild.
 	Guild(id string) (*types.Guild, error)
-	// Member gets a guild member by their user ID.
-	Member(id string) (*types.Member, error)
-	// Presence gets a user presence by a user ID.
-	Presence(id string) (*types.Presence, error)
-	// Role gets a role by its ID.
+
+	// Member gets a guild member.
+	Member(guildID string, memberID string) (*types.Member, error)
+
+	// Message gets a message.
+	Message(id string) (*types.Message, error)
+
+	// PermissionOverwrite gets a role or user permission overwrite for a channel.
+	PermissionOverwrite(channelID, overwriteID string) (*types.PermissionOverwrite, error)
+
+	// Presence gets a user's guild presence.
+	Presence(guildID string, userID string) (*types.Presence, error)
+
+	// Role gets a role.
 	Role(id string) (*types.Role, error)
-	// User gets a user by their ID.
+
+	// User gets a user.
 	User(id string) (*types.User, error)
 }
