@@ -2,12 +2,10 @@ package gateway
 
 import (
 	"context"
-	"net/http"
-	"sync"
-
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 	"nhooyr.io/websocket"
+	"sync"
 )
 
 // Gateway URL
@@ -32,6 +30,7 @@ type Session struct {
 func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string) *Session {
 	return &Session{
 		log:        logger,
+		sequence:   -1,
 		shardCount: shardCount,
 		shardID:    shardID,
 		token:      token,
@@ -44,13 +43,9 @@ func (s *Session) Open(ctx context.Context) error {
 	s.disconnect = make(chan bool)
 	s.done = make(chan struct{})
 
-	// Initialise websocket headers.
-	headers := http.Header{}
-	headers.Add("Accept-Encoding", "zlib")
-
 	// Attempt to handshake.
 	s.log.Debug("connecting to the gateway", zap.Uint("shard", s.shardID))
-	ws, _, err := websocket.Dial(ctx, gatewayURL, websocket.DialOptions{HTTPHeader: headers})
+	ws, _, err := websocket.Dial(ctx, gatewayURL, &websocket.DialOptions{})
 	if err != nil {
 		close(s.done)
 		return xerrors.Errorf("failed to connect to the gateway: %w", err)
@@ -76,15 +71,21 @@ func (s *Session) Open(ctx context.Context) error {
 	// If we have a sequence number or a session ID, attempt to resume,
 	// otherwise create a new session.
 	if s.sequence != 0 || s.sessionID != "" {
-		// Resume.
 		s.log.Debug("resuming session")
+		identifyLimiter.acquire()
 		if err = s.resume(ctx); err != nil {
-			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID))
-			return err
+			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID), zap.Error(err))
+			s.sequence = 0
+			s.sessionID = ""
 		}
-	} else {
-		// Identify.
+	}
+
+	// If sequence is 0 attempt to identify.
+	if s.sequence == 0 {
+		s.log.Debug("identifying", zap.Uint("shard", s.shardID))
+		identifyLimiter.acquire()
 		if err = s.identify(ctx); err != nil {
+			close(s.done)
 			return xerrors.Errorf("failed to identify: %w", err)
 		}
 	}
@@ -95,7 +96,7 @@ func (s *Session) Open(ctx context.Context) error {
 	return nil
 }
 
-// HandleConnection handles the connection by listening to the signals.
+// HandleConnection handles the connection by listening to the signals and handling events.
 func (s *Session) handleConnection(ctx context.Context) {
 	// Var to store whether to reconnect after disconnecting.
 	var reconnect bool

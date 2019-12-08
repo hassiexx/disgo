@@ -3,9 +3,13 @@ package gateway
 import (
 	"context"
 	"runtime"
+	"sync"
+	"time"
 
 	"golang.org/x/xerrors"
 )
+
+var identifyLimiter = &identifyRateLimiter{}
 
 type identifyPayload struct {
 	Op uint         `json:"op"`
@@ -51,4 +55,27 @@ func (s *Session) identify(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// IdentifyRateLimiter is the identify rate limiter.
+// The API allows one identify every 5 seconds.
+type identifyRateLimiter struct {
+	lastIdentify time.Time
+	sync.Mutex
+}
+
+// Acquire gets a token from the rate limiter.
+// If a token is not available, it will sleep for the time difference.
+func (rl *identifyRateLimiter) acquire() {
+	rl.Lock()
+
+	duration := time.Now().Sub(rl.lastIdentify).Seconds()
+
+	if duration >= 5 {
+		return
+	}
+
+	time.Sleep(time.Duration(5-duration) * time.Second)
+
+	rl.lastIdentify = time.Now()
 }
