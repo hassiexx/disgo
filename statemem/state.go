@@ -142,11 +142,15 @@ func (s *State) Role(id string) (*types.Role, error) {
 }
 
 // Self gets the bot user.
-func (s *State) Self() *types.User {
+func (s *State) Self() (*types.User, error) {
 	s.RLock()
 	defer s.RUnlock()
 
-	return s.self
+	if s.self != nil {
+		return nil, statecore.ErrNotFound
+	}
+
+	return s.self, nil
 }
 
 // SetSelf sets the bot user.

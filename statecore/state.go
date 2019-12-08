@@ -31,7 +31,7 @@ type State interface {
 	Role(id string) (*types.Role, error)
 
 	// Self gets the bot user.
-	Self() *types.User
+	Self() (*types.User, error)
 
 	// SetSelf sets the bot user.
 	SetSelf(self *types.User)
