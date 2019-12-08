@@ -9,14 +9,29 @@ import (
 type event string
 
 const (
-	eventReady event = "READY"
+	eventChannelCreate event = "CHANNEL_CREATE"
+	eventReady         event = "READY"
 )
+
+func (s *Session) channelCreate(data json.RawMessage) error {
+	var channel *types.Channel
+
+	// Unmarshal data.
+	if err := unmarshalRaw(data, &channel); err != nil {
+		return xerrors.Errorf("failed to unmarshal channel create data", err)
+	}
+
+	// Store channel in state.
+	s.state.AddChannel(channel)
+
+	return nil
+}
 
 func (s *Session) ready(data json.RawMessage) error {
 	var readyData readyData
 
 	// Unmarshal data.
-	if err := unmarshalRaw(data, readyData); err != nil {
+	if err := unmarshalRaw(data, &readyData); err != nil {
 		return xerrors.Errorf("failed to unmarshal ready data", err)
 	}
 

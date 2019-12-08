@@ -22,6 +22,30 @@ type State struct {
 	sync.RWMutex
 }
 
+// AddChannel adds a channel.
+func (s *State) AddChannel(channel *types.Channel) {
+	s.Lock()
+	defer s.Unlock()
+
+	// Extract permission overwrites from channel.
+	overwrites := channel.PermissionOverwrites
+	channel.PermissionOverwrites = nil
+
+	// Add overwrites to map and channel permission overwrite hash set.
+	for _, overwrite := range overwrites {
+		s.permissionOverwrites[channel.ID][overwrite.ID] = overwrite
+		channel.PermissionOverwriteSet.Add(overwrite.ID)
+	}
+
+	// Add channel to map.
+	s.channels[channel.ID] = channel
+
+	// If the channel is a guild channel, add the channel ID to the guild channel hash set.
+	if channel.GuildID != "" {
+		s.guilds[channel.GuildID].ChannelSet.Add(channel.ID)
+	}
+}
+
 // AddGuildsReady adds unavailable guilds from the ready event.
 func (s *State) AddGuildsReady(guilds []*types.Guild) {
 	s.Lock()

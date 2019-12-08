@@ -155,7 +155,12 @@ func (s *Session) handleEvent(ctx context.Context) {
 
 			// Check event type.
 			switch payload.T {
+			case string(eventChannelCreate):
+				s.log.Debug("handling channel create event")
+				err = s.cha
+
 			case string(eventReady):
+				s.log.Debug("handling ready event")
 				err = s.ready(payload.D)
 			}
 
