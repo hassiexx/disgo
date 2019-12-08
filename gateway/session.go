@@ -157,7 +157,7 @@ func (s *Session) handleEvent(ctx context.Context) {
 			switch payload.T {
 			case string(eventChannelCreate):
 				s.log.Debug("handling channel create event")
-				err = s.cha
+				err = s.channelCreate(payload.D)
 
 			case string(eventReady):
 				s.log.Debug("handling ready event")
