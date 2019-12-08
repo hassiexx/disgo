@@ -78,4 +78,6 @@ func (rl *identifyRateLimiter) acquire() {
 	time.Sleep(time.Duration(5-duration) * time.Second)
 
 	rl.lastIdentify = time.Now()
+
+	rl.Unlock()
 }
