@@ -17,7 +17,7 @@ type State struct {
 	permissionOverwrites map[string]map[string]*types.PermissionOverwrite
 	presences            map[string]map[string]*types.Presence
 	roles                map[string]*types.Role
-	self                 types.User
+	self                 *types.User
 	users                map[string]*types.User
 	sync.RWMutex
 }
@@ -142,7 +142,7 @@ func (s *State) Role(id string) (*types.Role, error) {
 }
 
 // Self gets the bot user.
-func (s *State) Self() types.User {
+func (s *State) Self() *types.User {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -150,7 +150,7 @@ func (s *State) Self() types.User {
 }
 
 // SetSelf sets the bot user.
-func (s *State) SetSelf(self types.User) {
+func (s *State) SetSelf(self *types.User) {
 	s.Lock()
 	defer s.Unlock()
 
