@@ -2,10 +2,13 @@ package gateway
 
 import (
 	"context"
+	"sync"
+	"time"
+
+	"github.com/hassieswift621/disgo/statecore"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
 	"nhooyr.io/websocket"
-	"sync"
 )
 
 // Gateway URL
@@ -17,10 +20,11 @@ type Session struct {
 	done           chan struct{}
 	heartbeatState *heartbeatState
 	log            *zap.Logger
-	sequence       uint64
+	sequence       uint
 	sessionID      string
 	shardCount     uint
 	shardID        uint
+	state          statecore.State
 	token          string
 	wg             sync.WaitGroup
 	ws             *websocket.Conn
@@ -74,7 +78,7 @@ func (s *Session) Open(ctx context.Context) error {
 		s.log.Debug("resuming session")
 		identifyLimiter.acquire()
 		if err = s.resume(ctx); err != nil {
-			s.log.Warn("failed to resume session", zap.Uint("shard", s.shardID), zap.Error(err))
+			s.log.Debug("failed to resume session", zap.Uint("shard", s.shardID), zap.Error(err))
 			s.sequence = 0
 			s.sessionID = ""
 		}
@@ -105,9 +109,10 @@ func (s *Session) handleConnection(ctx context.Context) {
 	case <-s.done:
 		// Received disconnect signal from external source.
 		// Stop handling connection.
-		return
 	case reconnect = <-s.disconnect:
 	case <-ctx.Done():
+	default:
+		s.handleEvent(ctx)
 	}
 
 	// Signal goroutines to stop.
@@ -118,18 +123,72 @@ func (s *Session) handleConnection(ctx context.Context) {
 
 	// Close session.
 	if err := s.ws.Close(websocket.StatusInternalError, ""); err != nil {
-		s.log.Info("failed to close websocket", zap.Uint("shard", s.shardID), zap.Error(err))
+		s.log.Debug("failed to close websocket", zap.Uint("shard", s.shardID), zap.Error(err))
 		return
 	}
 
 	if reconnect {
 		// Reopen session.
 		if err := s.Open(ctx); err != nil {
-			s.log.Info("failed to reconnect websocket", zap.Uint("shard", s.shardID), zap.Error(err))
+			s.log.Debug("failed to reconnect", zap.Uint("shard", s.shardID), zap.Error(err))
 		}
 	} else {
 		// Reset session state.
 		s.sequence = 0
 		s.sessionID = ""
+	}
+}
+
+func (s *Session) handleEvent(ctx context.Context) {
+	payload, err := s.readPayload(ctx)
+	if err != nil {
+		s.log.Debug("failed to read payload", zap.Uint("shard", s.shardID), zap.Error(err))
+		s.disconnect <- true
+	} else {
+		switch payload.Op {
+		// Dispatch.
+		case uint(opcodeDispatch):
+			// Store sequence number.
+			s.sequence = payload.S
+
+			var err error
+
+			// Check event type.
+			switch payload.T {
+			case string(eventReady):
+				err = s.ready(payload.D)
+			}
+
+			if err != nil {
+				s.log.Debug("failed to handle event", zap.Uint("shard", s.shardID), zap.Error(err))
+			}
+
+		// Heartbeat.
+		case uint(opcodeHeartbeat):
+			err := s.sendHeartbeat(ctx)
+			if err != nil {
+				s.log.Debug("failed to send heartbeat upon request", zap.Uint("shard", s.shardID),
+					zap.Error(err))
+				if ctx.Err() == nil {
+					s.disconnect <- true
+				}
+			}
+
+		// Reconnect.
+		case uint(opcodeReconnect):
+			s.disconnect <- true
+
+		// Invalid session.
+		case uint(opcodeReconnect):
+			s.sequence = 0
+			s.sessionID = ""
+			s.disconnect <- true
+
+		// Heartbeat ACK.
+		case uint(opcodeHeartbeatACK):
+			s.heartbeatState.Lock()
+			s.heartbeatState.LastHeartbeatAck = time.Now()
+			s.heartbeatState.Unlock()
+		}
 	}
 }

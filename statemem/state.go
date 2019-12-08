@@ -1,6 +1,8 @@
 package statemem
 
 import (
+	"sync"
+
 	"github.com/hassieswift621/disgo/common/types"
 	"github.com/hassieswift621/disgo/statecore"
 )
@@ -15,11 +17,16 @@ type State struct {
 	permissionOverwrites map[string]map[string]*types.PermissionOverwrite
 	presences            map[string]map[string]*types.Presence
 	roles                map[string]*types.Role
+	self                 types.User
 	users                map[string]*types.User
+	sync.RWMutex
 }
 
 // Channel gets a channel by its ID.
 func (s *State) Channel(id string) (*types.Channel, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	channel, exists := s.channels[id]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -30,6 +37,9 @@ func (s *State) Channel(id string) (*types.Channel, error) {
 
 // Emoji gets an emoji by its ID.
 func (s *State) Emoji(id string) (*types.Emoji, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	emoji, exists := s.emojis[id]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -40,6 +50,9 @@ func (s *State) Emoji(id string) (*types.Emoji, error) {
 
 // Guild gets a guild by its ID.
 func (s *State) Guild(id string) (*types.Guild, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	guild, exists := s.guilds[id]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -50,6 +63,9 @@ func (s *State) Guild(id string) (*types.Guild, error) {
 
 // Member gets a guild member.
 func (s *State) Member(guildID string, memberID string) (*types.Member, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	guild, exists := s.members[guildID]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -65,6 +81,9 @@ func (s *State) Member(guildID string, memberID string) (*types.Member, error) {
 
 // Message gets a message.
 func (s *State) Message(id string) (*types.Message, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	message, exists := s.messages[id]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -75,6 +94,9 @@ func (s *State) Message(id string) (*types.Message, error) {
 
 // PermissionOverwrite gets a role or user permission overwrite for a channel.
 func (s *State) PermissionOverwrite(channelID string, overwriteID string) (*types.PermissionOverwrite, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	channel, exists := s.permissionOverwrites[channelID]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -90,6 +112,9 @@ func (s *State) PermissionOverwrite(channelID string, overwriteID string) (*type
 
 // Presence gets a user's guild presence.
 func (s *State) Presence(guildID string, userID string) (*types.Presence, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	guild, exists := s.presences[guildID]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -105,6 +130,9 @@ func (s *State) Presence(guildID string, userID string) (*types.Presence, error)
 
 // Role gets a role.
 func (s *State) Role(id string) (*types.Role, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	role, exists := s.roles[id]
 	if !exists {
 		return nil, statecore.ErrNotFound
@@ -113,8 +141,27 @@ func (s *State) Role(id string) (*types.Role, error) {
 	return role, nil
 }
 
+// Self gets the bot user.
+func (s *State) Self() types.User {
+	s.RLock()
+	defer s.RUnlock()
+
+	return s.self
+}
+
+// SetSelf sets the bot user.
+func (s *State) SetSelf(self types.User) {
+	s.Lock()
+	defer s.Unlock()
+
+	s.self = self
+}
+
 // User gets a user.
 func (s *State) User(id string) (*types.User, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	user, exists := s.users[id]
 	if !exists {
 		return nil, statecore.ErrNotFound

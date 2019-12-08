@@ -11,7 +11,7 @@ import (
 )
 
 type heartbeatPayload struct {
-	Op uint   `json:"op"`
+	Op uint   `json:"op,omitempty"`
 	D  uint64 `json:"d"`
 }
 
