@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"go.uber.org/zap"
@@ -11,8 +10,8 @@ import (
 )
 
 type heartbeatPayload struct {
-	Op uint   `json:"op,omitempty"`
-	D  uint64 `json:"d"`
+	Op uint `json:"op,omitempty"`
+	D  uint `json:"d"`
 }
 
 type heartbeatState struct {
@@ -74,7 +73,7 @@ func (s *Session) sendHeartbeat(ctx context.Context) error {
 	// Create payload.
 	payload := heartbeatPayload{
 		Op: uint(opcodeHeartbeat),
-		D:  atomic.LoadUint64(&s.sequence),
+		D:  s.sequence,
 	}
 
 	// Send payload.

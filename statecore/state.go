@@ -6,6 +6,10 @@ import (
 
 // State is the interface for a state caching implementation.
 type State interface {
+
+	// AddGuildsReady adds unavailable guilds from the ready event.
+	AddGuildsReady(guilds []*types.Guild)
+
 	// Channel gets a channel.
 	Channel(id string) (*types.Channel, error)
 

@@ -26,11 +26,14 @@ func (s *Session) ready(data json.RawMessage) error {
 	// Store bot user in state.
 	s.state.SetSelf(readyData.User)
 
+	// Store guilds in state.
+	s.state.AddGuildsReady(readyData.Guild)
+
 	return nil
 }
 
 type readyData struct {
-	Guild     []types.Guild `json:"guilds"`
-	SessionID string        `json:"session_id"`
-	User      types.User    `json:"user"`
+	Guild     []*types.Guild `json:"guilds"`
+	SessionID string         `json:"session_id"`
+	User      *types.User    `json:"user"`
 }

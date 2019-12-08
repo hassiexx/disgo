@@ -22,6 +22,19 @@ type State struct {
 	sync.RWMutex
 }
 
+// AddGuildsReady adds unavailable guilds from the ready event.
+func (s *State) AddGuildsReady(guilds []*types.Guild) {
+	s.Lock()
+	defer s.Unlock()
+
+	for _, guild := range guilds {
+		s.guilds[guild.ID] = &types.Guild{
+			ID:          guild.ID,
+			Unavailable: true,
+		}
+	}
+}
+
 // Channel gets a channel by its ID.
 func (s *State) Channel(id string) (*types.Channel, error) {
 	s.RLock()
