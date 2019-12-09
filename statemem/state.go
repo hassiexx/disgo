@@ -33,7 +33,13 @@ func (s *State) AddChannel(channel *types.Channel) {
 
 	// Add overwrites to map and channel permission overwrite hash set.
 	for _, overwrite := range overwrites {
-		s.permissionOverwrites[channel.ID][overwrite.ID] = overwrite
+		overwriteMap, exists := s.permissionOverwrites[channel.ID]
+		if !exists {
+			overwriteMap = make(map[string]*types.PermissionOverwrite)
+		}
+		overwriteMap[overwrite.ID] = overwrite
+		s.permissionOverwrites[channel.ID] = overwriteMap
+
 		channel.PermissionOverwriteSet.Add(overwrite.ID)
 	}
 

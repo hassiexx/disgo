@@ -34,7 +34,6 @@ type Session struct {
 func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string) *Session {
 	return &Session{
 		log:        logger,
-		sequence:   -1,
 		shardCount: shardCount,
 		shardID:    shardID,
 		token:      token,
@@ -174,9 +173,7 @@ func (s *Session) handleEvent(ctx context.Context) {
 			if err != nil {
 				s.log.Debug("failed to send heartbeat upon request", zap.Uint("shard", s.shardID),
 					zap.Error(err))
-				if ctx.Err() == nil {
-					s.disconnect <- true
-				}
+				s.disconnect <- true
 			}
 
 		// Reconnect.
@@ -184,7 +181,7 @@ func (s *Session) handleEvent(ctx context.Context) {
 			s.disconnect <- true
 
 		// Invalid session.
-		case uint(opcodeReconnect):
+		case uint(opcodeInvalidSession):
 			s.sequence = 0
 			s.sessionID = ""
 			s.disconnect <- true

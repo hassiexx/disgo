@@ -9,7 +9,7 @@ import (
 type resumePayload struct {
 	Token     string `json:"token"`
 	SessionID string `json:"session_id"`
-	Seq       uint64 `json:"seq"`
+	Seq       uint   `json:"seq"`
 }
 
 func (s *Session) resume(ctx context.Context) error {
