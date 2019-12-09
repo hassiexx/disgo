@@ -41,6 +41,13 @@ func (s *State) AddChannel(channel *types.Channel) {
 	s.Lock()
 	defer s.Unlock()
 
+	// Initialise channel hash sets.
+	channel.MessageSet = types.NewStringHashSet()
+	channel.PermissionOverwriteSet = types.NewStringHashSet()
+	if channel.Type == types.ChannelTypeDM || channel.Type == types.ChannelTypeGroupDM {
+		channel.RecipientSet = types.NewStringHashSet()
+	}
+
 	// Extract permission overwrites from channel.
 	overwrites := channel.PermissionOverwrites
 	channel.PermissionOverwrites = nil
@@ -75,6 +82,11 @@ func (s *State) AddGuildsReady(guilds []*types.Guild) {
 		s.guilds[guild.ID] = &types.Guild{
 			ID:          guild.ID,
 			Unavailable: true,
+			ChannelSet:  types.NewStringHashSet(),
+			EmojiSet:    types.NewStringHashSet(),
+			MemberSet:   types.NewStringHashSet(),
+			PresenceSet: types.NewStringHashSet(),
+			RoleSet:     types.NewStringHashSet(),
 		}
 	}
 }

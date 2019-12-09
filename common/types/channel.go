@@ -1,5 +1,15 @@
 package types
 
+const (
+	ChannelTypeGuildText uint = iota
+	ChannelTypeDM
+	ChannelTypeGuildVoice
+	ChannelTypeGroupDM
+	ChannelTypeGuildCategory
+	ChannelTypeGuildNews
+	ChannelTypeGuildStore
+)
+
 // Channel is a struct for a channel.
 type Channel struct {
 	ApplicationID        string                 `json:"application_id"`
@@ -21,7 +31,7 @@ type Channel struct {
 	UserLimit            uint                   `json:"user_limit"`
 
 	// For state caching.
-	MessageSet             StringHashSet
-	PermissionOverwriteSet StringHashSet
-	RecipientSet           StringHashSet
+	MessageSet             *StringHashSet
+	PermissionOverwriteSet *StringHashSet
+	RecipientSet           *StringHashSet
 }

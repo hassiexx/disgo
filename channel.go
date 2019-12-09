@@ -8,7 +8,7 @@ import (
 type ChannelType uint
 
 const (
-	ChannelTypeGuildText ChannelType = iota
+	ChannelTypeGuildText uint = iota
 	ChannelTypeDM
 	ChannelTypeGuildVoice
 	ChannelTypeGroupDM
