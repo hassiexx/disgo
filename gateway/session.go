@@ -150,14 +150,22 @@ func (s *Session) handleEvent(ctx context.Context) {
 			// Store sequence number.
 			s.sequence = payload.S
 
+			// Var to store error from handling event.
 			var err error
 
 			// Check event type.
 			switch payload.T {
+			// Channel Create.
 			case string(eventChannelCreate):
 				s.log.Debug("handling channel create event")
 				err = s.channelCreate(payload.D)
 
+			// Channel Update.
+			case string(eventChannelUpdate):
+				s.log.Debug("handling channel update event")
+				err = s.channelUpdate(payload.D)
+
+			// Ready.
 			case string(eventReady):
 				s.log.Debug("handling ready event")
 				err = s.ready(payload.D)

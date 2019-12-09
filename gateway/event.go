@@ -11,6 +11,7 @@ type event string
 
 const (
 	eventChannelCreate event = "CHANNEL_CREATE"
+	eventChannelUpdate event = "CHANNEL_UPDATE"
 	eventReady         event = "READY"
 )
 
@@ -20,6 +21,20 @@ func (s *Session) channelCreate(data json.RawMessage) error {
 	// Unmarshal data.
 	if err := unmarshalRaw(data, &channel); err != nil {
 		return xerrors.Errorf("failed to unmarshal channel create data", err)
+	}
+
+	// Store channel in state.
+	s.state.AddChannel(channel)
+
+	return nil
+}
+
+func (s *Session) channelUpdate(data json.RawMessage) error {
+	var channel *types.Channel
+
+	// Unmarshal data.
+	if err := unmarshalRaw(data, &channel); err != nil {
+		return xerrors.Errorf("failed to unmarshal channel update data", err)
 	}
 
 	// Store channel in state.
