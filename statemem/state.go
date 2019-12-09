@@ -22,6 +22,20 @@ type State struct {
 	sync.RWMutex
 }
 
+// New creates a new instance of state.
+func New() *State {
+	return &State{
+		channels:             make(map[string]*types.Channel),
+		emojis:               make(map[string]*types.Emoji),
+		guilds:               make(map[string]*types.Guild),
+		members:              make(map[string]map[string]*types.Member),
+		permissionOverwrites: make(map[string]map[string]*types.PermissionOverwrite),
+		presences:            make(map[string]map[string]*types.Presence),
+		roles:                make(map[string]*types.Role),
+		users:                make(map[string]*types.User),
+	}
+}
+
 // AddChannel adds a channel.
 func (s *State) AddChannel(channel *types.Channel) {
 	s.Lock()
