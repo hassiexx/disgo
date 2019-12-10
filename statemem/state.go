@@ -3,8 +3,8 @@ package statemem
 import (
 	"sync"
 
-	"github.com/hassieswift621/disgo/common/types"
 	"github.com/hassieswift621/disgo/statecore"
+	"github.com/hassieswift621/disgo/types"
 )
 
 // State is a struct for state cache.

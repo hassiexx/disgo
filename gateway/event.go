@@ -3,7 +3,7 @@ package gateway
 import (
 	"encoding/json"
 
-	"github.com/hassieswift621/disgo/common/types"
+	"github.com/hassieswift621/disgo/types"
 	"golang.org/x/xerrors"
 )
 

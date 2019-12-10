@@ -1,7 +1,7 @@
 package statecore
 
 import (
-	"github.com/hassieswift621/disgo/common/types"
+	"github.com/hassieswift621/disgo/types"
 )
 
 // State is the interface for a state caching implementation.
