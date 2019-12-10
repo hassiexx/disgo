@@ -43,7 +43,7 @@ func (s *State) AddChannel(channel *types.Channel) {
 
 	// Check if the channel is a DM.
 	if channel.Recipients != nil {
-		// Extract recipients and addq to users map and channel recipient hash set.
+		// Extract recipients and add to users map and channel recipient hash set.
 		recipients := channel.Recipients
 		channel.Recipients = nil
 		channel.RecipientSet = types.NewStringHashSet()
@@ -105,11 +105,6 @@ func (s *State) AddGuildsReady(guilds []*types.Guild) {
 		s.guilds[guild.ID] = &types.Guild{
 			ID:          guild.ID,
 			Unavailable: true,
-			ChannelSet:  types.NewStringHashSet(),
-			EmojiSet:    types.NewStringHashSet(),
-			MemberSet:   types.NewStringHashSet(),
-			PresenceSet: types.NewStringHashSet(),
-			RoleSet:     types.NewStringHashSet(),
 		}
 	}
 }
