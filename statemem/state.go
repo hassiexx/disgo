@@ -41,12 +41,35 @@ func (s *State) AddChannel(channel *types.Channel) {
 	s.Lock()
 	defer s.Unlock()
 
+	// Check if the channel is a DM.
+	if channel.Recipients != nil {
+		// Extract recipients and to users map and channel recipient hash set.
+		recipients := channel.Recipients
+		channel.Recipients = nil
+		channel.RecipientSet = types.NewStringHashSet()
+
+		for _, recipient := range recipients {
+			user, exists := s.users[recipient.ID]
+			if exists {
+				// Update user.
+				user.AvatarHash = recipient.AvatarHash
+				user.Discriminator = recipient.Discriminator
+				user.Username = recipient.Username
+			} else {
+				s.users[recipient.ID] = recipient
+			}
+			channel.RecipientSet.Add(recipient.ID)
+		}
+
+		// Add channel to channels map.
+		s.channels[channel.ID] = channel
+
+		return
+	}
+
 	// Initialise channel hash sets.
 	channel.MessageSet = types.NewStringHashSet()
 	channel.PermissionOverwriteSet = types.NewStringHashSet()
-	if channel.Type == types.ChannelTypeDM || channel.Type == types.ChannelTypeGroupDM {
-		channel.RecipientSet = types.NewStringHashSet()
-	}
 
 	// Extract permission overwrites from channel.
 	overwrites := channel.PermissionOverwrites
