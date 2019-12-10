@@ -43,7 +43,7 @@ func (s *State) AddChannel(channel *types.Channel) {
 
 	// Check if the channel is a DM.
 	if channel.Recipients != nil {
-		// Extract recipients and to users map and channel recipient hash set.
+		// Extract recipients and add to users map and channel recipient hash set.
 		recipients := channel.Recipients
 		channel.Recipients = nil
 		channel.RecipientSet = types.NewStringHashSet()
