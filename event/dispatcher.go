@@ -2,8 +2,8 @@ package event
 
 import "github.com/hassieswift621/disgo/types"
 
-// Handler is the interface for an event handler.
-type Handler interface {
+// Dispatcher is the interface for an event dispatcher.
+type Dispatcher interface {
 	// ChannelCreate event.
 	ChannelCreate(channel types.Channel)
 
