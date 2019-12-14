@@ -13,28 +13,28 @@ type State interface {
 	AddGuildsReady(guilds []*types.Guild)
 
 	// Channel gets a channel.
-	Channel(id string) (types.Channel, error)
+	Channel(id uint64) (types.Channel, error)
 
 	// Emoji gets an emoji.
-	Emoji(id string) (types.Emoji, error)
+	Emoji(id uint64) (types.Emoji, error)
 
 	// Guild gets a guild.
-	Guild(id string) (types.Guild, error)
+	Guild(id uint64) (types.Guild, error)
 
 	// Member gets a guild member.
-	Member(guildID string, memberID string) (types.Member, error)
+	Member(guildID uint64, memberID uint64) (types.Member, error)
 
 	// Message gets a message.
-	Message(id string) (types.Message, error)
+	Message(id uint64) (types.Message, error)
 
 	// PermissionOverwrite gets a role or user permission overwrite for a channel.
-	PermissionOverwrite(channelID, overwriteID string) (types.PermissionOverwrite, error)
+	PermissionOverwrite(channelID, overwriteID uint64) (types.PermissionOverwrite, error)
 
 	// Presence gets a user's guild presence.
-	Presence(guildID string, userID string) (types.Presence, error)
+	Presence(guildID uint64, userID uint64) (types.Presence, error)
 
 	// Role gets a role.
-	Role(id string) (types.Role, error)
+	Role(id uint64) (types.Role, error)
 
 	// Self gets the bot user.
 	Self() (types.User, error)

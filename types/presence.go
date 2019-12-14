@@ -2,7 +2,7 @@ package types
 
 // Presence is a struct for a user's presence.
 type Presence struct {
-	GuildID string   `json:"guild_id"`
+	GuildID uint64   `json:"guild_id,string"`
 	Roles   []string `json:"roles"`
 	Status  string   `json:"status"`
 	User    *User    `json:"user"`
@@ -10,7 +10,7 @@ type Presence struct {
 
 // Activity is a struct for a presence activity.
 type Activity struct {
-	ApplicationID string             `json:"application_id"`
+	ApplicationID uint64             `json:"application_id,string"`
 	Assets        *ActivityAsset     `json:"assets"`
 	Details       string             `json:"details"`
 	Flags         uint               `json:"flags"`

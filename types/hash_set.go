@@ -44,3 +44,45 @@ func (s *StringHashSet) Values() []string {
 	}
 	return values
 }
+
+// UInt64HashSet is a type for a uint64 hash set.
+type UInt64HashSet struct {
+	m map[uint64]*hashSetValue
+}
+
+// NewUInt64HashSet creates a new string hash set.
+func NewUInt64HashSet() *UInt64HashSet {
+	return &UInt64HashSet{
+		m: make(map[uint64]*hashSetValue),
+	}
+}
+
+// Add adds a value to the hash set.
+func (s *UInt64HashSet) Add(v uint64) {
+	s.m[v] = nil
+}
+
+// Contains checks whether the specified value is in the hash set.
+func (s *UInt64HashSet) Contains(v uint64) bool {
+	_, exists := s.m[v]
+	return exists
+}
+
+// IsEmpty checks whether the hash set is empty.
+func (s *UInt64HashSet) IsEmpty() bool {
+	return len(s.m) == 0
+}
+
+// Remove removes a value from the hash set.
+func (s *UInt64HashSet) Remove(v uint64) {
+	delete(s.m, v)
+}
+
+// Values gets the values from the hash set.
+func (s *UInt64HashSet) Values() []uint64 {
+	var values []uint64
+	for k, _ := range s.m {
+		values = append(values, k)
+	}
+	return values
+}

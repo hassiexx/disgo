@@ -2,20 +2,20 @@ package types
 
 // Guild is a struct for a guild.
 type Guild struct {
-	AFKChannelID                string        `json:"afk_channel_id"`
+	AFKChannelID                uint64        `json:"afk_channel_id,string"`
 	AFKTimeout                  uint          `json:"afk_timeout"`
-	ApplicationID               string        `json:"application_id"`
+	ApplicationID               uint64        `json:"application_id,string"`
 	Banner                      string        `json:"banner"`
 	Channels                    []*Channel    `json:"channels"`
 	DefaultMessageNotifications uint          `json:"default_message_notifications"`
 	Description                 string        `json:"description"`
-	EmbedChannelID              string        `json:"embed_channel_id"`
+	EmbedChannelID              uint64        `json:"embed_channel_id,string"`
 	EmbedEnabled                bool          `json:"embed_enabled"`
 	Emojis                      []*Emoji      `json:"emoji"`
 	ExplicitContentFilter       uint          `json:"explicit_content_filter"`
 	Features                    []string      `json:"features"`
 	Icon                        string        `json:"icon"`
-	ID                          string        `json:"id"`
+	ID                          uint64        `json:"id,string"`
 	JoinedAt                    string        `json:"joined_at"`
 	Large                       bool          `json:"large"`
 	MaxMembers                  uint          `json:"max_members"`
@@ -25,7 +25,7 @@ type Guild struct {
 	MFALevel                    uint          `json:"mfa_level"`
 	Name                        string        `json:"name"`
 	Owner                       bool          `json:"owner"`
-	OwnerID                     string        `json:"owner_id"`
+	OwnerID                     uint64        `json:"owner_id,string"`
 	Permissions                 uint          `json:"permissions"`
 	PreferredLocale             string        `json:"preferred_locale"`
 	PremiumSubscriptionType     uint          `json:"premium_subscription_type"`
@@ -34,16 +34,16 @@ type Guild struct {
 	Region                      string        `json:"region"`
 	Roles                       []*Role       `json:"roles"`
 	Splash                      string        `json:"splash"`
-	SystemChannelID             string        `json:"system_channel_id"`
+	SystemChannelID             uint64        `json:"system_channel_id,string"`
 	Unavailable                 bool          `json:"available"`
 	VanityURLCode               string        `json:"vanity_url_code"`
 	VerificationLevel           uint          `json:"verification_level"`
 	VoiceStates                 []*VoiceState `json:"voice_states"`
-	WidgetChannelID             string        `json:"widget_channel_id"`
+	WidgetChannelID             uint64        `json:"widget_channel_id,string"`
 	WidgetEnabled               bool          `json:"widget_enabled"`
 
 	// For state caching.
-	ChannelSet *StringHashSet
-	EmojiSet   *StringHashSet
-	RoleSet    *StringHashSet
+	ChannelSet *UInt64HashSet
+	EmojiSet   *UInt64HashSet
+	RoleSet    *UInt64HashSet
 }

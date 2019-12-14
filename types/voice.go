@@ -2,14 +2,14 @@ package types
 
 // VoiceState is a struct for a voice state.
 type VoiceState struct {
-	ChannelID string  `json:"channel_id"`
+	ChannelID uint64  `json:"channel_id,string"`
 	Deaf      bool    `json:"deaf"`
-	GuildID   string  `json:"guild_id"`
+	GuildID   uint64  `json:"guild_id,string"`
 	Member    *Member `json:"member"`
 	Mute      bool    `json:"mute"`
 	SelfDeaf  bool    `json:"self_deaf"`
 	SelfMute  bool    `json:"self_mute"`
 	SessionID string  `json:"session_id"`
 	Suppress  bool    `json:"suppress"`
-	UserID    string  `json:"user_id"`
+	UserID    uint64  `json:"user_id,string"`
 }

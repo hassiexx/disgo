@@ -14,14 +14,14 @@ const (
 type Channel struct {
 	ApplicationID        string                 `json:"application_id"`
 	Bitrate              uint                   `json:"bitrate"`
-	GuildID              string                 `json:"guild_id"`
+	GuildID              uint64                 `json:"guild_id,string"`
 	Icon                 string                 `json:"icon"`
-	ID                   string                 `json:"id"`
-	LastMessageID        string                 `json:"last_message_id"`
+	ID                   uint64                 `json:"id,string"`
+	LastMessageID        uint64                 `json:"last_message_id,string"`
 	LastPinTimestamp     string                 `json:"last_pin_timestamp"`
 	Name                 string                 `json:"name"`
 	NSFW                 bool                   `json:"nsfw"`
-	ParentID             string                 `json:"parent_id"`
+	ParentID             uint64                 `json:"parent_id,string"`
 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites"`
 	Position             uint                   `json:"position"`
 	RateLimitPerUser     uint                   `json:"rate_limit_per_user"`
@@ -31,5 +31,5 @@ type Channel struct {
 	UserLimit            uint                   `json:"user_limit"`
 
 	// For state caching.
-	RecipientSet *StringHashSet
+	RecipientSet *UInt64HashSet
 }

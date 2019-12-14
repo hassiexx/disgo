@@ -6,13 +6,13 @@ type Message struct {
 	Application      *MessageApplication `json:"application"`
 	Attachments      []*Attachment       `json:"attachments"`
 	Author           *MessageAuthor      `json:"author"`
-	ChannelID        string              `json:"channel_id"`
+	ChannelID        uint64              `json:"channel_id,string"`
 	Content          string              `json:"content"`
 	EditedTimestamp  string              `json:"edited_timestamp"`
 	Embeds           []*Embed            `json:"embeds"`
 	Flags            uint                `json:"flags"`
-	GuildID          string              `json:"guild_id"`
-	ID               string              `json:"id"`
+	GuildID          uint64              `json:"guild_id,string"`
+	ID               uint64              `json:"id,string"`
 	Member           *Member             `json:"member"`
 	MentionChannels  []*ChannelMention   `json:"mention_channels"`
 	MentionEveryone  bool                `json:"mention_everyone"`
@@ -25,14 +25,14 @@ type Message struct {
 	Timestamp        string              `json:"timestamp"`
 	TTS              bool                `json:"tts"`
 	Type             uint                `json:"type"`
-	WebhookID        string              `json:"webhook_id"`
+	WebhookID        uint64              `json:"webhook_id,string"`
 }
 
 // Attachment is a struct for a message attachment.
 type Attachment struct {
 	Filename string `json:"filename"`
 	Height   uint   `json:"height"`
-	ID       string `json:"id"`
+	ID       uint64 `json:"id,string"`
 	ProxyURL string `json:"proxy_url"`
 	Size     uint   `json:"size"`
 	URL      string `json:"url"`
@@ -41,8 +41,8 @@ type Attachment struct {
 
 // ChannelMention is a struct for a channel mention in a message.
 type ChannelMention struct {
-	GuildID string `json:"guild_id"`
-	ID      string `json:"id"`
+	GuildID uint64 `json:"guild_id,string"`
+	ID      uint64 `json:"id,string"`
 	Name    string `json:"name"`
 	Type    uint   `json:"type"`
 }
@@ -58,7 +58,7 @@ type MessageApplication struct {
 	CoverImage  string `json:"cover_image"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
-	ID          string `json:"id"`
+	ID          uint64 `json:"id,string"`
 	Name        string `json:"name"`
 }
 
@@ -67,7 +67,7 @@ type MessageAuthor struct {
 	Avatar        string `json:"avatar"`
 	Bot           bool   `json:"bot"`
 	Discriminator string `json:"discriminator"`
-	ID            string `json:"id"`
+	ID            uint64 `json:"id,string"`
 	Username      string `json:"username"`
 }
 
@@ -80,9 +80,9 @@ type Reaction struct {
 
 // MessageReference is a struct for a message reference sent with a crossposted message.
 type MessageReference struct {
-	ChannelID string `json:"channel_id"`
-	GuildID   string `json:"guild_id"`
-	MessageID string `json:"message_id"`
+	ChannelID uint64 `json:"channel_id,string"`
+	GuildID   uint64 `json:"guild_id,string"`
+	MessageID uint64 `json:"message_id,string"`
 }
 
 // UserMention is a struct for a user mention in a message.
@@ -90,7 +90,7 @@ type UserMention struct {
 	Avatar        string  `json:"avatar"`
 	Bot           bool    `json:"bot"`
 	Discriminator string  `json:"discriminator"`
-	ID            string  `json:"id"`
+	ID            uint64  `json:"id,string"`
 	Username      string  `json:"username"`
 	Member        *Member `json:"member"`
 }

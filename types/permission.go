@@ -4,6 +4,6 @@ package types
 type PermissionOverwrite struct {
 	Allow uint   `json:"allow"`
 	Deny  uint   `json:"deny"`
-	ID    string `json:"id"`
+	ID    uint64 `json:"id,string"`
 	Type  string `json:"type"`
 }
