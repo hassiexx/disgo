@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hassieswift621/disgo/event"
 	"github.com/hassieswift621/disgo/statecore"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -16,6 +17,7 @@ const gatewayURL = "wss://gateway.discord.gg/?v=6&encoding=json"
 
 // Session is a single connection to the Discord Gateway.
 type Session struct {
+	dispatcher     event.Dispatcher
 	disconnect     chan bool
 	done           chan struct{}
 	heartbeatState *heartbeatState
@@ -31,8 +33,9 @@ type Session struct {
 }
 
 // NewSession creates a new session.
-func NewSession(logger *zap.Logger, shardCount uint, shardID uint, token string) *Session {
+func NewSession(dispatcher event.Dispatcher, logger *zap.Logger, shardCount uint, shardID uint, token string) *Session {
 	return &Session{
+		dispatcher: dispatcher,
 		log:        logger,
 		shardCount: shardCount,
 		shardID:    shardID,

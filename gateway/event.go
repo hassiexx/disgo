@@ -7,12 +7,12 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type event string
+type gatewayEvent string
 
 const (
-	eventChannelCreate event = "CHANNEL_CREATE"
-	eventChannelUpdate event = "CHANNEL_UPDATE"
-	eventReady         event = "READY"
+	eventChannelCreate gatewayEvent = "CHANNEL_CREATE"
+	eventChannelUpdate gatewayEvent = "CHANNEL_UPDATE"
+	eventReady         gatewayEvent = "READY"
 )
 
 func (s *Session) channelCreate(data json.RawMessage) error {
@@ -24,7 +24,10 @@ func (s *Session) channelCreate(data json.RawMessage) error {
 	}
 
 	// Store channel in state.
-	s.state.AddChannel(channel)
+	channel = s.state.AddChannel(channel)
+
+	// Dispatch event.
+	s.dispatcher.ChannelCreate(*channel)
 
 	return nil
 }
@@ -38,7 +41,10 @@ func (s *Session) channelUpdate(data json.RawMessage) error {
 	}
 
 	// Store channel in state.
-	s.state.AddChannel(channel)
+	channel = s.state.AddChannel(channel)
+
+	// Dispatch event.
+	s.dispatcher.ChannelUpdate(*channel)
 
 	return nil
 }
@@ -59,6 +65,9 @@ func (s *Session) ready(data json.RawMessage) error {
 
 	// Store guilds in state.
 	s.state.AddGuildsReady(readyData.Guild)
+
+	// Dispatch event.
+	s.dispatcher.Ready(s.shardID)
 
 	return nil
 }
