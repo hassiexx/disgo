@@ -24,10 +24,10 @@ func (s *Session) channelCreate(data json.RawMessage) error {
 	}
 
 	// Store channel in state.
-	channel = s.state.AddChannel(channel)
+	channelState := s.state.AddChannel(channel)
 
 	// Dispatch event.
-	s.dispatcher.ChannelCreate(*channel)
+	s.dispatcher.ChannelCreate(channelState)
 
 	return nil
 }
@@ -41,10 +41,10 @@ func (s *Session) channelUpdate(data json.RawMessage) error {
 	}
 
 	// Store channel in state.
-	channel = s.state.AddChannel(channel)
+	channelState := s.state.AddChannel(channel)
 
 	// Dispatch event.
-	s.dispatcher.ChannelUpdate(*channel)
+	s.dispatcher.ChannelUpdate(channelState)
 
 	return nil
 }
