@@ -35,3 +35,12 @@ func (s *StringHashSet) IsEmpty() bool {
 func (s *StringHashSet) Remove(v string) {
 	delete(s.m, v)
 }
+
+// Values gets the values from the hash set.
+func (s *StringHashSet) Values() []string {
+	var values []string
+	for k, _ := range s.m {
+		values = append(values, k)
+	}
+	return values
+}
