@@ -35,7 +35,7 @@ type identifyProperties struct {
 func (s *Session) identify(ctx context.Context) error {
 	// Create payload.
 	payload := identifyPayload{
-		Op: uint(opcodeIdentify),
+		Op: opcodeIdentify,
 		D: identifyData{
 			Token: s.token,
 			Properties: identifyProperties{

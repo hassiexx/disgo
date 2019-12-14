@@ -72,7 +72,7 @@ func (s *Session) heartbeat(ctx context.Context) {
 func (s *Session) sendHeartbeat(ctx context.Context) error {
 	// Create payload.
 	payload := heartbeatPayload{
-		Op: uint(opcodeHeartbeat),
+		Op: opcodeHeartbeat,
 		D:  s.sequence,
 	}
 

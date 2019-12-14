@@ -1,17 +1,15 @@
 package gateway
 
-type opcode uint
-
 const (
-	opcodeDispatch            opcode = 0
-	opcodeHeartbeat           opcode = 1
-	opcodeIdentify            opcode = 2
-	opcodeStatusUpdate        opcode = 3
-	opcodeVoiceStateUpdate    opcode = 4
-	opcodeResume              opcode = 6
-	opcodeReconnect           opcode = 7
-	opcodeRequestGuildMembers opcode = 8
-	opcodeInvalidSession      opcode = 9
-	opcodeHello               opcode = 10
-	opcodeHeartbeatACK        opcode = 11
+	opcodeDispatch            uint = 0
+	opcodeHeartbeat           uint = 1
+	opcodeIdentify            uint = 2
+	opcodeStatusUpdate        uint = 3
+	opcodeVoiceStateUpdate    uint = 4
+	opcodeResume              uint = 6
+	opcodeReconnect           uint = 7
+	opcodeRequestGuildMembers uint = 8
+	opcodeInvalidSession      uint = 9
+	opcodeHello               uint = 10
+	opcodeHeartbeatACK        uint = 11
 )

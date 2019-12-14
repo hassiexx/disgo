@@ -149,7 +149,7 @@ func (s *Session) handleEvent(ctx context.Context) {
 	} else {
 		switch payload.Op {
 		// Dispatch.
-		case uint(opcodeDispatch):
+		case opcodeDispatch:
 			// Store sequence number.
 			s.sequence = payload.S
 
@@ -159,17 +159,17 @@ func (s *Session) handleEvent(ctx context.Context) {
 			// Check event type.
 			switch payload.T {
 			// Channel Create.
-			case string(eventChannelCreate):
+			case eventChannelCreate:
 				s.log.Debug("handling channel create event")
 				err = s.channelCreate(payload.D)
 
 			// Channel Update.
-			case string(eventChannelUpdate):
+			case eventChannelUpdate:
 				s.log.Debug("handling channel update event")
 				err = s.channelUpdate(payload.D)
 
 			// Ready.
-			case string(eventReady):
+			case eventReady:
 				s.log.Debug("handling ready event")
 				err = s.ready(payload.D)
 			}
@@ -179,7 +179,7 @@ func (s *Session) handleEvent(ctx context.Context) {
 			}
 
 		// Heartbeat.
-		case uint(opcodeHeartbeat):
+		case opcodeHeartbeat:
 			err := s.sendHeartbeat(ctx)
 			if err != nil {
 				s.log.Debug("failed to send heartbeat upon request", zap.Uint("shard", s.shardID),
@@ -188,17 +188,17 @@ func (s *Session) handleEvent(ctx context.Context) {
 			}
 
 		// Reconnect.
-		case uint(opcodeReconnect):
+		case opcodeReconnect:
 			s.disconnect <- true
 
 		// Invalid session.
-		case uint(opcodeInvalidSession):
+		case opcodeInvalidSession:
 			s.sequence = 0
 			s.sessionID = ""
 			s.disconnect <- true
 
 		// Heartbeat ACK.
-		case uint(opcodeHeartbeatACK):
+		case opcodeHeartbeatACK:
 			s.heartbeatState.Lock()
 			s.heartbeatState.LastHeartbeatAck = time.Now()
 			s.heartbeatState.Unlock()

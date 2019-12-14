@@ -7,12 +7,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type gatewayEvent string
-
 const (
-	eventChannelCreate gatewayEvent = "CHANNEL_CREATE"
-	eventChannelUpdate gatewayEvent = "CHANNEL_UPDATE"
-	eventReady         gatewayEvent = "READY"
+	eventChannelCreate string = "CHANNEL_CREATE"
+	eventChannelUpdate string = "CHANNEL_UPDATE"
+	eventReady         string = "READY"
 )
 
 func (s *Session) channelCreate(data json.RawMessage) error {
