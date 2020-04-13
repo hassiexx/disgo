@@ -78,7 +78,7 @@ func (s *Session) sendHeartbeat(ctx context.Context) error {
 
 	// Send payload.
 	if err := s.sendPayload(ctx, payload); err != nil {
-		return xerrors.Errorf("failed to send heartbeat payload: %w", err)
+		return xerrors.Errorf("send heartbeat payload: %w", err)
 	}
 
 	return nil

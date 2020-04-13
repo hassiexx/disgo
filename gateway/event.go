@@ -1,8 +1,7 @@
 package gateway
 
 import (
-	"encoding/json"
-
+	"github.com/hassieswift621/disgo/json"
 	"github.com/hassieswift621/disgo/types"
 	"golang.org/x/xerrors"
 )
@@ -17,8 +16,8 @@ func (s *Session) channelCreate(data json.RawMessage) error {
 	var channel *types.Channel
 
 	// Unmarshal data.
-	if err := unmarshalRaw(data, &channel); err != nil {
-		return xerrors.Errorf("failed to unmarshal channel create data", err)
+	if err := json.UnmarshalRaw(data, &channel); err != nil {
+		return xerrors.Errorf("unmarshal channel create data", err)
 	}
 
 	// Store channel in state.
@@ -34,8 +33,8 @@ func (s *Session) channelUpdate(data json.RawMessage) error {
 	var channel *types.Channel
 
 	// Unmarshal data.
-	if err := unmarshalRaw(data, &channel); err != nil {
-		return xerrors.Errorf("failed to unmarshal channel update data", err)
+	if err := json.UnmarshalRaw(data, &channel); err != nil {
+		return xerrors.Errorf("unmarshal channel update data", err)
 	}
 
 	// Store channel in state.
@@ -51,8 +50,8 @@ func (s *Session) ready(data json.RawMessage) error {
 	var readyData readyData
 
 	// Unmarshal data.
-	if err := unmarshalRaw(data, &readyData); err != nil {
-		return xerrors.Errorf("failed to unmarshal ready data", err)
+	if err := json.UnmarshalRaw(data, &readyData); err != nil {
+		return xerrors.Errorf("unmarshal ready data", err)
 	}
 
 	// Store session ID.

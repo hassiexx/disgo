@@ -2,8 +2,8 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
 
+	"github.com/hassieswift621/disgo/json"
 	"golang.org/x/xerrors"
 	"nhooyr.io/websocket"
 )
@@ -20,19 +20,20 @@ func (s *Session) readPayload(ctx context.Context) (*payload, error) {
 	// Read payload.
 	msgType, r, err := s.ws.Reader(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to read payload: %w", err)
+		return nil, xerrors.Errorf("read payload: %w", err)
 	}
 
 	// Get payload.
 	var payload payload
 	if msgType == websocket.MessageBinary {
 		// Decompress and unmarshal.
-		if err = decompressUnmarshal(r, &payload); err != nil {
-			return nil, xerrors.Errorf("failed to decompress payload: %w", err)
+
+		if err = json.UnmarshalZlib(r, &payload); err != nil {
+			return nil, xerrors.Errorf("decompress payload: %w", err)
 		}
 	} else {
-		if err = unmarshal(r, &payload); err != nil {
-			return nil, xerrors.Errorf("failed to unmarshal payload: %w", err)
+		if err = json.Unmarshal(r, &payload); err != nil {
+			return nil, xerrors.Errorf("unmarshal payload: %w", err)
 		}
 	}
 
@@ -48,14 +49,14 @@ func (s *Session) sendPayload(ctx context.Context, payload interface{}) error {
 	}
 
 	// Marshal payload.
-	if err = marshal(w, payload); err != nil {
+	if err = json.Marshal(w, payload); err != nil {
 		_ = w.Close()
-		return xerrors.Errorf("failed to marshal payload: %w", err)
+		return xerrors.Errorf("marshal payload: %w", err)
 	}
 
 	// Send payload by closing the writer.
 	if err = w.Close(); err != nil {
-		return xerrors.Errorf("failed to send payload: %w", err)
+		return xerrors.Errorf("send payload: %w", err)
 	}
 
 	return nil

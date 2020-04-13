@@ -54,7 +54,7 @@ func (s *Session) Open(ctx context.Context) error {
 	ws, _, err := websocket.Dial(ctx, gatewayURL, &websocket.DialOptions{})
 	if err != nil {
 		close(s.done)
-		return xerrors.Errorf("failed to connect to the gateway: %w", err)
+		return xerrors.Errorf("connect to gateway: %w", err)
 	}
 
 	// Store websocket.
@@ -67,7 +67,7 @@ func (s *Session) Open(ctx context.Context) error {
 	s.log.Debug("receiving hello payload", zap.Uint("shard", s.shardID))
 	if err = s.hello(ctx); err != nil {
 		close(s.done)
-		return xerrors.Errorf("failed to read hello payload: %w", err)
+		return xerrors.Errorf("read hello payload: %w", err)
 	}
 
 	// Start heartbeating.
@@ -92,7 +92,7 @@ func (s *Session) Open(ctx context.Context) error {
 		identifyLimiter.acquire()
 		if err = s.identify(ctx); err != nil {
 			close(s.done)
-			return xerrors.Errorf("failed to identify: %w", err)
+			return xerrors.Errorf("identify: %w", err)
 		}
 	}
 

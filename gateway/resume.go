@@ -22,7 +22,7 @@ func (s *Session) resume(ctx context.Context) error {
 
 	// Send payload.
 	if err := s.sendPayload(ctx, payload); err != nil {
-		return xerrors.Errorf("failed to send resume payload: %w", err)
+		return xerrors.Errorf("send resume payload: %w", err)
 	}
 
 	return nil
