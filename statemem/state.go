@@ -37,7 +37,7 @@ func New() *State {
 }
 
 // AddChannel adds a channel.
-func (s *State) AddChannel(channel *types.Channel) types.Channel {
+func (s *State) AddChannel(channel *types.Channel) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -64,7 +64,7 @@ func (s *State) AddChannel(channel *types.Channel) types.Channel {
 		// Add channel to map.
 		s.channels[channel.ID] = channel
 
-		return *channel
+		return
 	}
 
 	// Extract permission overwrites from channel.
@@ -88,8 +88,6 @@ func (s *State) AddChannel(channel *types.Channel) types.Channel {
 	if channel.GuildID != 0 {
 		s.guilds[channel.GuildID].ChannelSet.Add(channel.ID)
 	}
-
-	return *channel
 }
 
 // AddGuildsReady adds unavailable guilds from the ready event.
@@ -106,134 +104,134 @@ func (s *State) AddGuildsReady(guilds []*types.Guild) {
 }
 
 // Channel gets a channel by its ID.
-func (s *State) Channel(id uint64) (types.Channel, error) {
+func (s *State) Channel(id uint64) (*types.Channel, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	channel, exists := s.channels[id]
 	if !exists {
-		return types.Channel{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *channel, nil
+	return channel, nil
 }
 
 // Emoji gets an emoji by its ID.
-func (s *State) Emoji(id uint64) (types.Emoji, error) {
+func (s *State) Emoji(id uint64) (*types.Emoji, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	emoji, exists := s.emojis[id]
 	if !exists {
-		return types.Emoji{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *emoji, nil
+	return emoji, nil
 }
 
 // Guild gets a guild by its ID.
-func (s *State) Guild(id uint64) (types.Guild, error) {
+func (s *State) Guild(id uint64) (*types.Guild, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	guild, exists := s.guilds[id]
 	if !exists {
-		return types.Guild{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *guild, nil
+	return guild, nil
 }
 
 // Member gets a guild member.
-func (s *State) Member(guildID uint64, memberID uint64) (types.Member, error) {
+func (s *State) Member(guildID uint64, memberID uint64) (*types.Member, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	guild, exists := s.members[guildID]
 	if !exists {
-		return types.Member{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
 	member, exists := guild[memberID]
 	if !exists {
-		return types.Member{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *member, nil
+	return member, nil
 }
 
 // Message gets a message.
-func (s *State) Message(id uint64) (types.Message, error) {
+func (s *State) Message(id uint64) (*types.Message, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	message, exists := s.messages[id]
 	if !exists {
-		return types.Message{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *message, nil
+	return message, nil
 }
 
 // PermissionOverwrite gets a role or user permission overwrite for a channel.
-func (s *State) PermissionOverwrite(channelID uint64, overwriteID uint64) (types.PermissionOverwrite, error) {
+func (s *State) PermissionOverwrite(channelID uint64, overwriteID uint64) (*types.PermissionOverwrite, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	channel, exists := s.permissionOverwrites[channelID]
 	if !exists {
-		return types.PermissionOverwrite{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
 	overwrite, exists := channel[overwriteID]
 	if !exists {
-		return types.PermissionOverwrite{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *overwrite, nil
+	return overwrite, nil
 }
 
 // Presence gets a user's guild presence.
-func (s *State) Presence(guildID uint64, userID uint64) (types.Presence, error) {
+func (s *State) Presence(guildID uint64, userID uint64) (*types.Presence, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	guild, exists := s.presences[guildID]
 	if !exists {
-		return types.Presence{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
 	presence, exists := guild[userID]
 	if !exists {
-		return types.Presence{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *presence, nil
+	return presence, nil
 }
 
 // Role gets a role.
-func (s *State) Role(id uint64) (types.Role, error) {
+func (s *State) Role(id uint64) (*types.Role, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	role, exists := s.roles[id]
 	if !exists {
-		return types.Role{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *role, nil
+	return role, nil
 }
 
 // Self gets the bot user.
-func (s *State) Self() (types.User, error) {
+func (s *State) Self() (*types.User, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	if s.self != nil {
-		return types.User{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *s.self, nil
+	return s.self, nil
 }
 
 // SetSelf sets the bot user.
@@ -245,14 +243,14 @@ func (s *State) SetSelf(self *types.User) {
 }
 
 // User gets a user.
-func (s *State) User(id uint64) (types.User, error) {
+func (s *State) User(id uint64) (*types.User, error) {
 	s.RLock()
 	defer s.RUnlock()
 
 	user, exists := s.users[id]
 	if !exists {
-		return types.User{}, statecore.ErrNotFound
+		return nil, statecore.ErrNotFound
 	}
 
-	return *user, nil
+	return user, nil
 }
